@@ -1,5 +1,5 @@
 /* ================================================================
-   NAORU整体 渋谷店 LP - main.js
+   NAORU整体 渋谷院 LP - main.js
    - FAQ accordion
    - Sticky CTA show/hide
    - Smooth scroll
