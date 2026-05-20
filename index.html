@@ -248,11 +248,16 @@
   </div>
 </section>
 
-<!-- ================== Before / After ================== -->
-<section class="section">
+<!-- ================== Before / After ==================
+  各事例の画像は assets/img/beforeafter/ に配置してください。
+  ファイル名: case1-before.jpg / case1-after.jpg / case2-before.jpg /
+  case2-after.jpg / case3-before.jpg / case3-after.jpg
+  画像が見つからない場合は placeholder.svg がフォールバック表示されます。
+-->
+<section class="section beforeafter" id="beforeafter">
   <div class="container">
     <div class="section-head reveal">
-      <div class="section-head__label">Posture Changes</div>
+      <div class="section-head__label">Before &amp; After</div>
       <h2 class="section-head__title">姿勢の変化を、ご覧ください。</h2>
       <p class="section-head__lead">AI姿勢分析の数値とともに、姿勢の客観的な変化を記録しています。</p>
     </div>
@@ -260,8 +265,14 @@
     <div class="beforeafter__grid">
       <div class="beforeafter__card reveal">
         <div class="beforeafter__images">
-          <div class="beforeafter__image" data-label="BEFORE">[ 横向き姿勢 ]</div>
-          <div class="beforeafter__image" data-label="AFTER">[ 横向き姿勢 ]</div>
+          <div class="beforeafter__image" data-label="BEFORE">
+            <img src="assets/img/beforeafter/case1-before.jpg" alt="施術前の横向き姿勢（30代男性）" loading="lazy"
+              onerror="this.onerror=null;this.src='assets/img/beforeafter/placeholder.svg';">
+          </div>
+          <div class="beforeafter__image" data-label="AFTER">
+            <img src="assets/img/beforeafter/case1-after.jpg" alt="施術後の横向き姿勢（30代男性）" loading="lazy"
+              onerror="this.onerror=null;this.src='assets/img/beforeafter/placeholder.svg';">
+          </div>
         </div>
         <div class="beforeafter__caption">
           <div class="beforeafter__attr">30代男性／IT企業</div>
@@ -271,8 +282,14 @@
 
       <div class="beforeafter__card reveal">
         <div class="beforeafter__images">
-          <div class="beforeafter__image" data-label="BEFORE">[ 横向き姿勢 ]</div>
-          <div class="beforeafter__image" data-label="AFTER">[ 横向き姿勢 ]</div>
+          <div class="beforeafter__image" data-label="BEFORE">
+            <img src="assets/img/beforeafter/case2-before.jpg" alt="施術前の横向き姿勢（40代女性）" loading="lazy"
+              onerror="this.onerror=null;this.src='assets/img/beforeafter/placeholder.svg';">
+          </div>
+          <div class="beforeafter__image" data-label="AFTER">
+            <img src="assets/img/beforeafter/case2-after.jpg" alt="施術後の横向き姿勢（40代女性）" loading="lazy"
+              onerror="this.onerror=null;this.src='assets/img/beforeafter/placeholder.svg';">
+          </div>
         </div>
         <div class="beforeafter__caption">
           <div class="beforeafter__attr">40代女性／広告代理店</div>
@@ -282,8 +299,14 @@
 
       <div class="beforeafter__card reveal">
         <div class="beforeafter__images">
-          <div class="beforeafter__image" data-label="BEFORE">[ 横向き姿勢 ]</div>
-          <div class="beforeafter__image" data-label="AFTER">[ 横向き姿勢 ]</div>
+          <div class="beforeafter__image" data-label="BEFORE">
+            <img src="assets/img/beforeafter/case3-before.jpg" alt="施術前の横向き姿勢（50代男性）" loading="lazy"
+              onerror="this.onerror=null;this.src='assets/img/beforeafter/placeholder.svg';">
+          </div>
+          <div class="beforeafter__image" data-label="AFTER">
+            <img src="assets/img/beforeafter/case3-after.jpg" alt="施術後の横向き姿勢（50代男性）" loading="lazy"
+              onerror="this.onerror=null;this.src='assets/img/beforeafter/placeholder.svg';">
+          </div>
         </div>
         <div class="beforeafter__caption">
           <div class="beforeafter__attr">50代男性／経営者</div>

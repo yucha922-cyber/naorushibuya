@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="姿勢写真のプレースホルダー">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0f3f7"/>
+      <stop offset="100%" stop-color="#d6dde6"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="url(#g)"/>
+  <!-- simple side-posture silhouette -->
+  <g fill="none" stroke="#9aa8ba" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="150" cy="110" r="26"/>
+    <path d="M150 136 C168 170 150 210 150 250 L150 300"/>
+    <path d="M150 175 L185 205"/>
+    <path d="M150 300 L130 360"/>
+    <path d="M150 300 L172 360"/>
+  </g>
+  <g transform="translate(150,375)" text-anchor="middle" font-family="'Noto Sans JP', sans-serif" fill="#8a95a5">
+    <text font-size="15" font-weight="500">横向き姿勢の写真</text>
+  </g>
+</svg>
