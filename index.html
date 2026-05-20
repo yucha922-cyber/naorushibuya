@@ -500,12 +500,24 @@
   </div>
 </section>
 
-<!-- ================== Flow (施術の流れ) ================== -->
-<section class="section">
+<!-- ================== Flow (施術の流れ) ==================
+  背景画像は assets/img/flow/bg.jpg に配置してください。
+  画像が見つからない場合は assets/img/flow/placeholder.svg がフォールバック表示されます。
+-->
+<section class="section flow" id="flow">
+  <div class="flow__bg" aria-hidden="true">
+    <img
+      src="assets/img/flow/bg.jpg"
+      alt=""
+      loading="lazy"
+      onerror="this.onerror=null;this.src='assets/img/flow/placeholder.svg';">
+  </div>
+  <div class="flow__overlay" aria-hidden="true"></div>
+
   <div class="container">
     <div class="section-head reveal">
       <div class="section-head__label">Flow</div>
-      <h2 class="section-head__title">初回の流れ（所要時間 約45分）</h2>
+      <h2 class="section-head__title">施術のフロー（所要時間 約60分）</h2>
       <p class="section-head__lead">初めての方も、これで安心です。</p>
     </div>
 
@@ -515,14 +527,14 @@
         <div>
           <h3 class="flow__title">ご来店・受付</h3>
           <div class="flow__time">所要 約3分</div>
-          <p class="flow__text">渋谷駅徒歩2分。ご予約時間にお越しください。受付では問診票をお書きいただきます。</p>
+          <p class="flow__text">渋谷駅・表参道駅から徒歩10分。ご予約時間にお越しください。問診票は事前のご記入をお願いしております。</p>
         </div>
       </li>
       <li class="flow__step reveal">
         <div class="flow__num">02</div>
         <div>
           <h3 class="flow__title">カウンセリング</h3>
-          <div class="flow__time">所要 約10分</div>
+          <div class="flow__time">所要 約15分</div>
           <p class="flow__text">現在のお身体のお悩み、お仕事や生活習慣、ご希望について丁寧に伺います。</p>
         </div>
       </li>
@@ -531,7 +543,7 @@
         <div>
           <h3 class="flow__title">AI姿勢分析</h3>
           <div class="flow__time">所要 約5分</div>
-          <p class="flow__text">専用機器でお身体を撮影し、姿勢の数値・グラフを画面でお見せしながら、現状をご一緒に確認します。</p>
+          <p class="flow__text">AIでお身体の姿勢を撮影・分析し、姿勢の傾きやバランスの状態を画面でお見せしながら、現状をご一緒に確認します。</p>
         </div>
       </li>
       <li class="flow__step reveal">
@@ -547,7 +559,7 @@
         <div>
           <h3 class="flow__title">アフターカウンセリング</h3>
           <div class="flow__time">所要 約5分</div>
-          <p class="flow__text">施術後の変化と、日常で意識していただきたいポイントをお伝えします。<strong>無理な物販・回数券の勧誘は行いません。</strong></p>
+          <p class="flow__text">施術後の変化と、日常で意識していただきたいポイントをお伝えします。<strong>無理な勧誘は行いません。</strong></p>
         </div>
       </li>
       <li class="flow__step reveal">
@@ -555,7 +567,7 @@
         <div>
           <h3 class="flow__title">お会計・次回ご案内</h3>
           <div class="flow__time">所要 約2分</div>
-          <p class="flow__text">初回は3,500円。継続をご希望の方には回数券のご案内もしますが、その場でのご決断は不要です。</p>
+          <p class="flow__text">初回は3,500円。継続をご希望の方には会員プランのご案内もいたします。</p>
         </div>
       </li>
     </ol>
@@ -669,19 +681,19 @@
       <tbody>
         <tr>
           <td>通常コース</td>
-          <td>AI再計測 ＋ 施術 30分</td>
-          <td class="price-cell">¥6,600</td>
+          <td>AIの再計測が不要な、施術30分のコース</td>
+          <td class="price-cell">¥7,700</td>
         </tr>
         <tr>
-          <td>4回回数券</td>
-          <td>1回あたり ¥6,250</td>
-          <td class="price-cell">¥25,000</td>
+          <td>月4回会員</td>
+          <td>1回あたり 約¥6,188</td>
+          <td class="price-cell">¥24,750</td>
         </tr>
       </tbody>
     </table>
 
     <div class="pricing__note reveal">
-      <strong>回数券について：</strong>お身体の状態によっては、複数回にわたって整体を受けていただく方が、ご自身の変化を実感しやすいと言われています。継続をご検討される方には回数券もご用意していますが、<strong>初回時に無理にご案内することはありません。</strong>実際に受けていただいたうえで、納得されてからお選びいただけます。
+      <strong>会員プランについて：</strong>お身体の状態によっては、複数回にわたって整体を受けていただく方が、ご自身の変化を実感しやすいと言われています。継続をご検討される方には会員プランもご用意していますが、<strong>初回時に無理にご案内することはありません。</strong>実際に受けていただいたうえで、納得されてからお選びいただけます。
     </div>
   </div>
 </section>
@@ -737,7 +749,7 @@
           <span class="faq__q-text">強引な勧誘はありませんか？</span>
           <span class="faq__q-toggle" aria-hidden="true"></span>
         </button>
-        <div class="faq__a"><div class="faq__a-inner">当院では、初回時に回数券や物販を無理にお勧めすることは一切ありません。実際に受けていただいたうえで、ご納得されてからお選びいただけます。</div></div>
+        <div class="faq__a"><div class="faq__a-inner">当院では、初回時に会員プランなどを無理にお勧めすることは一切ありません。実際に受けていただいたうえで、ご納得されてからお選びいただけます。</div></div>
       </div>
 
       <div class="faq__item reveal">
@@ -746,7 +758,7 @@
           <span class="faq__q-text">AI姿勢分析とは何ですか？</span>
           <span class="faq__q-toggle" aria-hidden="true"></span>
         </button>
-        <div class="faq__a"><div class="faq__a-inner">専用機器でお身体を撮影し、姿勢の傾きやバランスを数値・グラフで可視化する仕組みです。施術ごとに再計測し、変化をご確認いただけます。</div></div>
+        <div class="faq__a"><div class="faq__a-inner">AIでお身体の姿勢を撮影・分析し、姿勢の傾きやバランスの状態を画面でお見せする仕組みです。施術ごとに再計測し、変化をご確認いただけます。</div></div>
       </div>
 
       <div class="faq__item reveal">

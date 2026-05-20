@@ -806,8 +806,42 @@ ul, ol { list-style: none; }
 }
 
 /* ----------------------------------------------------------------
-   14. Flow
+   14. Flow - 背景画像 + フロストガラス風ステップカード
+   背景画像差し替え：assets/img/flow/bg.jpg を置き換えるだけ
 ---------------------------------------------------------------- */
+.flow {
+  position: relative;
+  background: var(--c-primary);
+  overflow: hidden;
+  isolation: isolate;
+}
+.flow__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.flow__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.flow__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg,
+      rgba(15, 25, 45, 0.80) 0%,
+      rgba(26, 43, 74, 0.86) 100%);
+}
+.flow .section-head__label { color: var(--c-accent-light); }
+.flow .section-head__title {
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.flow .section-head__lead { color: rgba(255, 255, 255, 0.82); }
+
 .flow__list {
   display: grid;
   gap: 16px;
@@ -819,16 +853,19 @@ ul, ol { list-style: none; }
   grid-template-columns: auto 1fr;
   gap: 16px;
   align-items: flex-start;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 20px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--c-border-soft);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 22px rgba(10, 20, 40, 0.18);
   position: relative;
 }
 .flow__num {
   width: 44px;
   height: 44px;
-  background: var(--c-accent);
+  background: linear-gradient(135deg, #4ba9b2 0%, #2c8a93 55%, #1a2b4a 100%);
   color: #fff;
   display: grid;
   place-items: center;
@@ -837,6 +874,7 @@ ul, ol { list-style: none; }
   font-size: 16px;
   font-weight: 700;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(44, 138, 147, 0.35);
 }
 .flow__title {
   font-family: var(--font-serif);
