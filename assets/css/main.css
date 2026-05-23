@@ -908,46 +908,82 @@ ul, ol { list-style: none; }
   overflow: hidden;
   border: 1px solid var(--c-border-soft);
   box-shadow: 0 2px 12px var(--c-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.staff__card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px var(--c-shadow);
 }
 .staff__photo {
+  margin: 0;
   aspect-ratio: 4 / 3;
   background: linear-gradient(135deg, #e8f3f4 0%, #d4e8eb 100%);
-  display: grid;
-  place-items: center;
-  color: var(--c-text-light);
-  font-size: 12px;
+  overflow: hidden;
+}
+.staff__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 }
 .staff__body {
-  padding: 20px;
-}
-.staff__name {
-  font-family: var(--font-serif);
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--c-primary);
-  margin-bottom: 4px;
+  padding: 24px;
 }
 .staff__role {
   font-size: 11px;
   color: var(--c-accent);
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   letter-spacing: 0.05em;
+}
+.staff__name {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--c-primary);
+  margin-bottom: 8px;
 }
 .staff__qual {
   font-size: 12px;
   color: var(--c-text-muted);
+  font-weight: 600;
   margin-bottom: 12px;
-  padding-bottom: 12px;
+}
+.staff__career {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0 0 16px;
   border-bottom: 1px solid var(--c-border-soft);
+}
+.staff__career li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 12px;
+  color: var(--c-text-muted);
+  line-height: 1.7;
+}
+.staff__career li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--c-accent-light);
 }
 .staff__msg {
   font-size: 13px;
   color: var(--c-text);
-  line-height: 1.8;
+  line-height: 1.85;
 }
 @media (min-width: 768px) {
   .staff__grid { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .staff__card { transition: none; }
+  .staff__card:hover { transform: none; }
 }
 
 /* ----------------------------------------------------------------

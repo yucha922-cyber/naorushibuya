@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="院長 洪侑沙の写真プレースホルダー">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8f3f4"/>
+      <stop offset="100%" stop-color="#d4e8eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <g fill="#a9c6cb">
+    <circle cx="400" cy="245" r="92"/>
+    <path d="M400 360c-110 0-198 70-198 156v84h396v-84c0-86-88-156-198-156z"/>
+  </g>
+  <g text-anchor="middle" font-family="'Noto Sans JP', sans-serif" fill="#5a6678">
+    <text x="400" y="560" font-size="28" font-weight="600">院長 洪 侑沙</text>
+  </g>
+</svg>
