@@ -424,8 +424,21 @@
   </div>
 </section>
 
-<!-- ================== Comparison ================== -->
+<!-- ================== Comparison ==================
+  背景画像は assets/img/compare/bg.jpg に配置してください。
+  画像が見つからない場合は assets/img/compare/placeholder.svg がフォールバック表示されます。
+-->
 <section class="section compare">
+  <div class="compare__bg" aria-hidden="true">
+    <img
+      src="assets/img/compare/bg.jpg"
+      alt=""
+      loading="lazy"
+      decoding="async"
+      onerror="this.onerror=null;this.src='assets/img/compare/placeholder.svg';">
+  </div>
+  <div class="compare__overlay" aria-hidden="true"></div>
+
   <div class="container">
     <div class="section-head reveal">
       <div class="section-head__label">Comparison</div>
