@@ -709,7 +709,30 @@ ul, ol { list-style: none; }
    12. Comparison Table
 ---------------------------------------------------------------- */
 .compare {
+  position: relative;
   background: var(--c-bg-soft);
+  overflow: hidden;
+  isolation: isolate;
+}
+.compare__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.compare__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.compare__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg,
+      rgba(244, 247, 250, 0.92) 0%,
+      rgba(244, 247, 250, 0.88) 100%);
 }
 .compare__wrap {
   overflow-x: auto;

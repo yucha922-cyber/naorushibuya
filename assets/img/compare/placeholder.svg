@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="比較セクション背景画像のプレースホルダー">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eef3f6"/>
+      <stop offset="55%" stop-color="#e3edf0"/>
+      <stop offset="100%" stop-color="#d6e7ea"/>
+    </linearGradient>
+    <pattern id="grid" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M0 80 L80 80 M80 0 L80 80" fill="none" stroke="rgba(26,43,74,0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <g transform="translate(800,400)" text-anchor="middle" font-family="'Noto Sans JP', sans-serif" fill="#5a6678">
+    <text font-size="52" font-weight="700">比較セクション 背景画像</text>
+    <text y="60" font-size="26" font-weight="500" fill="#8a95a5">未設定</text>
+  </g>
+  <g transform="translate(800,560)" text-anchor="middle" font-family="'Noto Sans JP', sans-serif" fill="#8a95a5">
+    <text font-size="24" font-weight="500">assets/img/compare/bg.jpg</text>
+    <text y="38" font-size="20">に画像をアップロードしてください</text>
+  </g>
+</svg>
