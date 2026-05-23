@@ -974,23 +974,33 @@ ul, ol { list-style: none; }
 .staff__grid {
   display: grid;
   gap: 24px;
+  max-width: 760px;
+  margin: 0 auto;
 }
 .staff__card {
   background: #fff;
   border-radius: var(--radius-md);
-  overflow: hidden;
   border: 1px solid var(--c-border-soft);
   box-shadow: 0 2px 12px var(--c-shadow);
+  padding: 24px;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .staff__card:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 28px var(--c-shadow);
 }
+.staff__top {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
 .staff__photo {
+  flex: 0 0 130px;
+  width: 130px;
   margin: 0;
   aspect-ratio: 3 / 4;
   background: linear-gradient(135deg, #e8f3f4 0%, #d4e8eb 100%);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 .staff__photo img {
@@ -1000,8 +1010,9 @@ ul, ol { list-style: none; }
   object-fit: cover;
   object-position: center top;
 }
-.staff__body {
-  padding: 24px;
+.staff__info {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .staff__role {
   font-size: 11px;
@@ -1017,6 +1028,14 @@ ul, ol { list-style: none; }
   color: var(--c-primary);
   margin-bottom: 8px;
 }
+.staff__name-en {
+  font-family: var(--font-sans, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-light);
+  letter-spacing: 0.08em;
+  margin-left: 8px;
+}
 .staff__qual {
   font-size: 12px;
   color: var(--c-text-muted);
@@ -1025,9 +1044,8 @@ ul, ol { list-style: none; }
 }
 .staff__career {
   list-style: none;
-  margin: 0 0 16px;
-  padding: 0 0 16px;
-  border-bottom: 1px solid var(--c-border-soft);
+  margin: 0;
+  padding: 0;
 }
 .staff__career li {
   position: relative;
@@ -1047,12 +1065,16 @@ ul, ol { list-style: none; }
   background: var(--c-accent-light);
 }
 .staff__msg {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--c-border-soft);
   font-size: 13px;
   color: var(--c-text);
   line-height: 1.85;
 }
 @media (min-width: 768px) {
-  .staff__grid { grid-template-columns: 1fr 1fr; }
+  .staff__top { gap: 24px; }
+  .staff__photo { flex: 0 0 200px; width: 200px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .staff__card { transition: none; }
