@@ -370,6 +370,56 @@ ul, ol { list-style: none; }
 }
 
 /* ----------------------------------------------------------------
+   7b. Section Divider (Worries → Risks)
+---------------------------------------------------------------- */
+.section-divider {
+  position: relative;
+  height: 88px;
+  background: var(--c-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.section-divider::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), transparent);
+}
+.section-divider__line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 30px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, var(--c-accent-light));
+}
+.section-divider__chevron {
+  width: 14px;
+  height: 14px;
+  margin-top: 6px;
+  border-right: 2px solid var(--c-accent-light);
+  border-bottom: 2px solid var(--c-accent-light);
+  transform: rotate(45deg);
+  opacity: 0.85;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .section-divider__chevron {
+    animation: divider-bounce 1.8s ease-in-out infinite;
+  }
+}
+@keyframes divider-bounce {
+  0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: 0.55; }
+  50%      { transform: rotate(45deg) translate(3px, 3px); opacity: 1; }
+}
+
+/* ----------------------------------------------------------------
    8. Risks - 背景画像 + フロストガラスカード + SVGアイコン
    背景画像差し替え：assets/img/risks/bg.jpg を置き換えるだけ
 ---------------------------------------------------------------- */
