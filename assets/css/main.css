@@ -989,7 +989,7 @@ ul, ol { list-style: none; }
 }
 .staff__photo {
   margin: 0;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
   background: linear-gradient(135deg, #e8f3f4 0%, #d4e8eb 100%);
   overflow: hidden;
 }
