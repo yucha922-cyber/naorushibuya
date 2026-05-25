@@ -314,21 +314,22 @@ ul, ol { list-style: none; }
   display: flex;
   align-items: center;
   gap: 14px;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
   padding: 16px 18px;
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 500;
   color: var(--c-primary);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 8px 24px rgba(20, 35, 60, 0.15);
-  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(20, 35, 60, 0.18);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .worries__item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(20, 35, 60, 0.22);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 12px 28px rgba(20, 35, 60, 0.25);
 }
 /* 新しいチェックマーク：グラデーション円形 + SVGチェック */
 .worries__check {
@@ -363,10 +364,13 @@ ul, ol { list-style: none; }
     0 1px 3px rgba(0,0,0,0.45);
 }
 @media (min-width: 768px) {
-  .worries__list { grid-template-columns: 1fr 1fr; gap: 14px; }
-  .worries__item { font-size: 15px; padding: 18px 20px; }
+  .worries__list { grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1080px; }
+  .worries__item { font-size: 15px; padding: 18px 24px; }
   .worries__check { width: 36px; height: 36px; }
   .worries__check::after { width: 18px; height: 18px; }
+}
+@media (min-width: 1024px) {
+  .worries__item { white-space: nowrap; }
 }
 
 /* ----------------------------------------------------------------
