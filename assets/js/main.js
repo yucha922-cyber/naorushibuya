@@ -255,4 +255,11 @@
   if (yearEl) {
     yearEl.textContent = String(new Date().getFullYear());
   }
+
+  // ---------- 8. LINE friend-add link injection ----------
+  // LINE友達追加URLをここで一括管理。lin.ee の発行URLに差し替えてください。
+  const LINE_FRIEND_URL = 'https://lin.ee/PLACEHOLDER';
+  document.querySelectorAll('[data-line-link]').forEach(function (el) {
+    el.setAttribute('href', LINE_FRIEND_URL);
+  });
 })();

@@ -213,6 +213,43 @@ ul, ol { list-style: none; }
   background: linear-gradient(135deg, #e8f3f4 0%, #d4e8eb 100%);
 }
 
+/* FV直下のCTA帯 */
+.fv-cta {
+  background: linear-gradient(to bottom, #f7fbfc 0%, #ffffff 100%);
+  padding: 22px 16px 26px;
+  border-bottom: 1px solid var(--c-border);
+}
+.fv-cta__inner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+.fv-cta__lead {
+  font-size: 14px;
+  color: var(--c-primary);
+  margin: 0 0 14px;
+  font-weight: 500;
+}
+.fv-cta__lead strong {
+  font-size: 18px;
+  color: var(--c-cta);
+}
+.fv-cta__btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.fv-cta__btns .btn {
+  flex: 1 1 240px;
+  max-width: 320px;
+}
+@media (min-width: 768px) {
+  .fv-cta { padding: 28px 20px 32px; }
+  .fv-cta__lead { font-size: 15px; margin-bottom: 16px; }
+  .fv-cta__lead strong { font-size: 20px; }
+}
+
 /* ----------------------------------------------------------------
    6. Buttons
 ---------------------------------------------------------------- */
