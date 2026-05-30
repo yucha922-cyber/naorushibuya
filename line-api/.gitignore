@@ -3,3 +3,7 @@ node_modules/
 .env.local
 .vercel/
 *.log
+credentials.json
+# サービスアカウントの鍵ファイル（誤コミット防止）
+naoru-line-ai-*.json
+*-service-account*.json
