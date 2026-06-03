@@ -174,6 +174,7 @@ async function handleEvent(event) {
   let mode        = 'ai';
   let inquiryStep = 0;
   let history     = [];
+  let reserved    = false; // 予約確定フラグ（true ならAIを起動しない）
 
   try {
     const [userData, hist, step] = await Promise.all([
@@ -184,11 +185,13 @@ async function handleEvent(event) {
     mode        = userData.mode ?? 'ai';
     history     = hist;
     inquiryStep = step;
+    reserved    = userData.reserved === true;
 
     // ---- 有人モードの自動復帰 -------------------------------------------
     // スタッフが対応完了後にAIへ戻し忘れても、最後のやり取りから
     // 一定時間（HUMAN_AUTO_REVERT_HOURS）が経過していれば自動でAIモードに戻す。
-    if (mode === 'human' && userData.lastMessageAt) {
+    // ※ 予約確定ユーザー（reserved）は自動復帰の対象外（AIを起動しない）。
+    if (!reserved && mode === 'human' && userData.lastMessageAt) {
       const elapsedMs   = Date.now() - new Date(userData.lastMessageAt).getTime();
       const elapsedHour = elapsedMs / (1000 * 60 * 60);
       if (elapsedHour >= HUMAN_AUTO_REVERT_HOURS) {
@@ -207,6 +210,8 @@ async function handleEvent(event) {
   if (RESET_KEYWORDS.some((kw) => userText.includes(kw))) {
     await setModeSafe(userId, 'ai');
     await safe('問診リセット', () => resetInquiry(userId));
+    // 予約確定フラグも解除（AIを再び使えるようにする）
+    await safe('予約確定解除', () => updateUserData(userId, { reserved: false }));
     savePatient({ userId, displayName, supportStatus: 'AI対応中' });
     return reply(event.replyToken, 'AI問診を再開します。\nメニューの「簡単AI診断」か、お悩みをそのままメッセージで送ってください。');
   }
@@ -216,6 +221,16 @@ async function handleEvent(event) {
     await setModeSafe(userId, 'completed');
     savePatient({ userId, displayName, supportStatus: '問診完了' });
     return null; // スタッフが最後のメッセージを送る
+  }
+
+  // ---- ②.5 予約確定ユーザー → AIを起動しない（スタッフ対応のまま）-------
+  // 予約済みの方には自動AI返信をせず、スタッフが手動で対応する。
+  // 解除するには #ai を送る（スタッフ）か、setReserved スクリプトで off にする。
+  if (reserved) {
+    logHistory({ userId, displayName, eventType: '予約確定ユーザーメッセージ', content: userText });
+    // 予約確定フラグのTTL（24時間）を延長し続ける（発言があるたびに更新）
+    await safe('最終時刻更新', () => updateUserData(userId, { lastMessageAt: new Date().toISOString() }));
+    return null; // AIは返信しない
   }
 
   // ---- ③ 有人対応中 → AIスキップ、記録のみ ---------------------------
