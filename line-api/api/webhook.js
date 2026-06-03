@@ -22,9 +22,9 @@
 const express = require('express');
 const line    = require('@line/bot-sdk');
 
-const { analyzeInquiry, generateInquirySummary }               = require('../utils/openai');
-const { appendToSheet, updateUserStatus, updateSupportStatus } = require('../utils/sheets');
-const { getQuestion, isCompleted, formatAnswers }              = require('../utils/inquiry');
+const { analyzeInquiry, generateInquirySummary } = require('../utils/openai');
+const { upsertPatient, appendHistory }           = require('../utils/sheets');
+const { getQuestion, isCompleted, formatAnswers } = require('../utils/inquiry');
 const { RICH_MENU_ACTIONS }                                    = require('../utils/richMenu');
 const {
   getUserData, getMode, setMode,
@@ -106,11 +106,12 @@ async function safe(label, fn) {
   catch (err) { console.error(`[webhook] ${label} 失敗:`, err.message); return null; }
 }
 
-const saveSheet     = (params)         => safe('Sheets追記',       () => appendToSheet(params));
-const updateStatus  = (row, statuses)  => safe('CRMステータス更新', () => updateUserStatus(row, statuses));
-const updateSupport = (row, status)    => safe('対応ステータス更新', () => updateSupportStatus(row, status));
-const setModeSafe   = (uid, mode)      => safe('モード変更',        () => setMode(uid, mode));
-const saveTalk      = (uid, u, a, ext) => safe('Redis保存',         () => saveConversation(uid, u, a, ext));
+// 患者マスターを upsert（更新 or 新規作成）
+const savePatient = (patient)      => safe('患者マスターupsert', () => upsertPatient(patient));
+// 対応履歴に1行追記
+const logHistory  = (log)          => safe('対応履歴追記',       () => appendHistory(log));
+const setModeSafe = (uid, mode)    => safe('モード変更',         () => setMode(uid, mode));
+const saveTalk    = (uid, u, a, ext) => safe('Redis保存',        () => saveConversation(uid, u, a, ext));
 
 // ---- メインのイベントハンドラ --------------------------------------------
 
@@ -121,11 +122,10 @@ async function handleEvent(event) {
     const userId      = event.source?.userId;
     const displayName = await getDisplayName(userId);
 
-    saveSheet({
-      userId, displayName,
-      symptom: '（友だち追加）', inquiry: '',
-      reservationStatus: '未予約', aiSummary: '友だち追加',
-    });
+    // 患者マスターに登録（新規作成）
+    savePatient({ userId, displayName, supportStatus: 'AI対応中', reservation: '未予約' });
+    // 対応履歴に記録
+    logHistory({ userId, displayName, eventType: '友だち追加', content: '' });
 
     return reply(
       event.replyToken,
@@ -143,7 +143,6 @@ async function handleEvent(event) {
   // Redis から現在の状態を一括取得
   let mode        = 'ai';
   let inquiryStep = 0;
-  let latestRow   = null;
   let history     = [];
 
   try {
@@ -152,8 +151,7 @@ async function handleEvent(event) {
       getConversationHistory(userId),
       getInquiryStep(userId),
     ]);
-    mode        = userData.mode      ?? 'ai';
-    latestRow   = userData.latestRow ?? null;
+    mode        = userData.mode ?? 'ai';
     history     = hist;
     inquiryStep = step;
   } catch (err) {
@@ -164,25 +162,21 @@ async function handleEvent(event) {
   if (RESET_KEYWORDS.some((kw) => userText.includes(kw))) {
     await setModeSafe(userId, 'ai');
     await safe('問診リセット', () => resetInquiry(userId));
-    if (latestRow) updateSupport(latestRow, 'AI対応中');
+    savePatient({ userId, displayName, supportStatus: 'AI対応中' });
     return reply(event.replyToken, 'AI問診を再開します。\nメニューの「簡単AI診断」か、お悩みをそのままメッセージで送ってください。');
   }
 
   // ---- ② 対応完了キーワード（スタッフ用）------------------------------
   if (COMPLETE_KEYWORDS.some((kw) => userText.includes(kw))) {
     await setModeSafe(userId, 'completed');
-    if (latestRow) updateSupport(latestRow, '問診完了');
+    savePatient({ userId, displayName, supportStatus: '問診完了' });
     return null; // スタッフが最後のメッセージを送る
   }
 
   // ---- ③ 有人対応中 → AIスキップ、記録のみ ---------------------------
   if (mode === 'human') {
-    saveSheet({
-      userId, displayName,
-      symptom: '有人対応', inquiry: userText,
-      reservationStatus: '対応中', aiSummary: 'スタッフ対応中のメッセージ',
-      supportStatus: '有人対応中',
-    });
+    // 患者マスターは状態維持。発言は対応履歴にのみ記録
+    logHistory({ userId, displayName, eventType: 'スタッフ対応中メッセージ', content: userText });
     return null; // AIは返信しない（スタッフが手動で返信）
   }
 
@@ -194,25 +188,22 @@ async function handleEvent(event) {
 
   // ---- ⑤ 問診進行中（step 1〜6）の回答を処理 -------------------------
   if (inquiryStep >= 1) {
-    return handleInquiryStep(event.replyToken, userId, displayName, userText, inquiryStep, latestRow);
+    return handleInquiryStep(event.replyToken, userId, displayName, userText, inquiryStep);
   }
 
   // ---- ⑥ リッチメニュー A「簡単AI診断」 または「AI問診」テキスト -------
   if (userText === RICH_MENU_ACTIONS.AI_INQUIRY || userText.includes('AI問診') || userText.includes('AI診断')) {
-    return handleInquiryStart(event.replyToken, userId);
+    return handleInquiryStart(event.replyToken, userId, displayName);
   }
 
   // ---- ⑦ リッチメニュー C「スタッフ相談」 または有人切替キーワード ------
   if (HUMAN_KEYWORDS.some((kw) => userText.includes(kw))) {
     await setModeSafe(userId, 'human');
     const replyText = `スタッフが順次ご対応いたします。少々お待ちください。\n\nお急ぎの方はお電話でも承ります。\n${TEL}`;
-    const row = await saveSheet({
-      userId, displayName,
-      symptom: '有人対応へ切替', inquiry: userText,
-      reservationStatus: '対応待ち', aiSummary: 'スタッフ相談ボタンで有人切替',
-      supportStatus: '有人対応中',
-    });
-    saveTalk(userId, userText, replyText, { latestRow: row ?? latestRow });
+    // 患者マスターを更新 + 対応履歴に記録
+    savePatient({ userId, displayName, supportStatus: '有人対応中', reservation: '対応待ち' });
+    logHistory({ userId, displayName, eventType: 'スタッフ相談', content: userText });
+    saveTalk(userId, userText, replyText, {});
     return reply(event.replyToken, replyText);
   }
 
@@ -237,22 +228,28 @@ async function handleEvent(event) {
     replyText += `\n\n▼初回予約（3,500円）\n${RESERVE_URL}`;
   }
 
-  const newRow = await saveSheet({
+  // 患者マスターを upsert（最新の症状・分析で更新）
+  savePatient({
     userId, displayName,
-    symptom:           aiResult.symptomType,
-    inquiry:           userText,
-    reservationStatus: aiResult.needsReservation ? '予約推奨' : '未予約',
-    postureType:       aiResult.postureType,
-    stress:            aiResult.stress,
-    deskWork:          aiResult.deskWork,
-    aiSummary:         `[危険度:${aiResult.riskScore}] ${aiResult.aiSummary}`,
-    supportStatus:     'AI対応中',
+    symptom:       aiResult.symptomType,
+    inquiry:       userText,
+    aiSummary:     `[危険度:${aiResult.riskScore}] ${aiResult.aiSummary}`,
+    postureType:   aiResult.postureType,
+    stress:        aiResult.stress,
+    deskWork:      aiResult.deskWork,
+    reservation:   aiResult.needsReservation ? '予約推奨' : '未予約',
+    supportStatus: 'AI対応中',
+    // 来院・離反を検出したら該当列も更新
+    ...(aiResult.visitDetected ? { visited: '済', continued: '継続' } : {}),
+    ...(aiResult.churnDetected ? { churned: '離反' } : {}),
   });
 
-  saveTalk(userId, userText, aiResult.replyText, { latestRow: newRow ?? latestRow });
+  // 対応履歴に記録
+  logHistory({ userId, displayName, eventType: 'AI問診（自由入力）', content: userText });
+  if (aiResult.visitDetected) logHistory({ userId, displayName, eventType: '来院', content: userText });
+  if (aiResult.churnDetected) logHistory({ userId, displayName, eventType: '離反', content: userText });
 
-  if (aiResult.visitDetected && latestRow) updateStatus(latestRow, { visited: '済', continued: '継続' });
-  if (aiResult.churnDetected && latestRow) updateStatus(latestRow, { churned: '離反' });
+  saveTalk(userId, userText, aiResult.replyText, {});
 
   return reply(event.replyToken, replyText);
 }
@@ -262,8 +259,11 @@ async function handleEvent(event) {
 /**
  * 問診を開始する（ステップ1の質問を送信）
  */
-async function handleInquiryStart(replyToken, userId) {
+async function handleInquiryStart(replyToken, userId, displayName) {
   await safe('問診開始', () => startInquiry(userId));
+
+  // 対応履歴に「AI問診開始」を記録
+  logHistory({ userId, displayName, eventType: 'AI問診開始', content: '' });
 
   return reply(replyToken, [
     '簡単AI診断を始めます。\n全6問です。それぞれの質問にお答えください。\n（途中でやめる場合は「キャンセル」と送ってください）',
@@ -275,7 +275,7 @@ async function handleInquiryStart(replyToken, userId) {
  * 問診の各ステップを処理する
  * 回答を保存 → 次の質問 or 全問完了時にサマリー生成
  */
-async function handleInquiryStep(replyToken, userId, displayName, userText, currentStep, latestRow) {
+async function handleInquiryStep(replyToken, userId, displayName, userText, currentStep) {
   const currentQuestion = getQuestion(currentStep);
   if (!currentQuestion) {
     await safe('問診リセット', () => resetInquiry(userId));
@@ -289,7 +289,7 @@ async function handleInquiryStep(replyToken, userId, displayName, userText, curr
 
   // 全6問終了？
   if (isCompleted(nextStep)) {
-    return handleInquiryComplete(replyToken, userId, displayName, latestRow);
+    return handleInquiryComplete(replyToken, userId, displayName);
   }
 
   // 次の質問を送信
@@ -300,7 +300,7 @@ async function handleInquiryStep(replyToken, userId, displayName, userText, curr
  * 全6問終了後の処理
  * OpenAI でサマリー・原因仮説・来院メリットを生成し、Sheetsに保存してユーザーに返答
  */
-async function handleInquiryComplete(replyToken, userId, displayName, latestRow) {
+async function handleInquiryComplete(replyToken, userId, displayName) {
   const answers = await safe('回答取得', () => getInquiryAnswers(userId)) ?? {};
 
   // OpenAI にサマリーを依頼（3〜5秒かかる場合があります）
@@ -316,22 +316,25 @@ async function handleInquiryComplete(replyToken, userId, displayName, latestRow)
     };
   }
 
-  // 問診内容を整形して Sheets に保存
-  const newRow = await saveSheet({
+  const inquiryText = formatAnswers(answers); // 全6問の回答をテキスト化
+
+  // 患者マスターを upsert（問診結果で更新）
+  savePatient({
     userId,
     displayName,
-    symptom:          summary.symptomType,
-    inquiry:          formatAnswers(answers),   // 全6問の回答をテキスト化
-    reservationStatus:'問診完了',
-    postureType:      summary.postureType,
-    aiSummary:        `[危険度:${summary.riskScore}] ${summary.summary ?? ''} ${summary.hypothesis ?? ''}`.trim(),
-    supportStatus:    '問診完了',
-    inquiryCompleted: '済',
+    symptom:       summary.symptomType,
+    inquiry:       inquiryText,
+    aiSummary:     `[危険度:${summary.riskScore}] ${summary.summary ?? ''} ${summary.hypothesis ?? ''}`.trim(),
+    postureType:   summary.postureType,
+    reservation:   '問診完了',
+    supportStatus: '問診完了',
   });
+
+  // 対応履歴に「AI問診完了」を記録
+  logHistory({ userId, displayName, eventType: 'AI問診完了', content: inquiryText });
 
   // 問診ステップをリセット
   await safe('問診リセット', () => resetInquiry(userId));
-  if (newRow ?? latestRow) updateSupport(newRow ?? latestRow, '問診完了');
 
   return reply(replyToken, summary.lineReply);
 }

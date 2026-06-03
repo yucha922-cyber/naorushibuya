@@ -1,31 +1,73 @@
 /**
- * Google Sheets への書き込み・更新ユーティリティ
+ * Google Sheets CRM ユーティリティ
  *
- * 列構成（A〜P列）:
- *   A: 日時          B: LINE表示名    C: 症状タイプ   D: 問診内容（全回答）
- *   E: 予約状況      F: 姿勢タイプ    G: ストレス     H: 睡眠
- *   I: デスクワーク  J: AI要約        K: 来院         L: 継続
- *   M: 離反          N: ユーザーID    O: 対応ステータス P: 問診完了
+ * 2シート構成:
+ *
+ *  ┌─────────────────────────────────────────────────────────┐
+ *  │ シート①「患者マスター」: 1患者 = 1行（upsert方式）         │
+ *  │   主キー: LINE User ID（A列）                              │
+ *  │   既存なら更新 / なければ新規作成                          │
+ *  ├─────────────────────────────────────────────────────────┤
+ *  │ シート②「対応履歴」: すべての行動ログ（append方式）        │
+ *  │   1イベント = 1行を末尾に追記                              │
+ *  └─────────────────────────────────────────────────────────┘
+ *
+ * 必要な環境変数:
+ *   SPREADSHEET_ID          : スプレッドシートID
+ *   GOOGLE_CREDENTIALS_JSON : credentials.json の中身（Vercel本番）
+ *   GOOGLE_CREDENTIALS_PATH : credentials.json のパス（ローカル開発、省略可）
  *
  * 関数一覧:
- *   appendToSheet(params)              : 末尾に1行追記 → 行番号を返す
- *   updateUserStatus(rowNum, statuses) : K/L/M列を更新
- *   updateSupportStatus(rowNum, status): O列を更新
+ *   upsertPatient(patient) : 患者マスターを upsert（更新 or 新規作成）
+ *   appendHistory(log)     : 対応履歴に1行追記
  */
 
 const { google } = require('googleapis');
 const path       = require('path');
 
+// ---- 設定 ---------------------------------------------------------------
+
 const SPREADSHEET_ID   = process.env.SPREADSHEET_ID;
 const CREDENTIALS_PATH = process.env.GOOGLE_CREDENTIALS_PATH
   ? path.resolve(process.env.GOOGLE_CREDENTIALS_PATH)
   : path.resolve(__dirname, '..', 'credentials.json');
-const SHEET_RANGE = 'シート1!A:P';
-const SHEET_NAME  = 'シート1';
-const SCOPES      = ['https://www.googleapis.com/auth/spreadsheets'];
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+
+// シート名（スプレッドシートのタブ名と一致させること）
+const PATIENT_SHEET = '患者マスター';
+const HISTORY_SHEET = '対応履歴';
+
+// ---- 患者マスターの列定義 -------------------------------------------------
+//
+// 配列の順番がそのまま列（A, B, C...）になる。
+// key      : upsertPatient() に渡すオブジェクトのフィールド名
+// header   : スプレッドシート1行目に入れるヘッダー名
+
+const PATIENT_COLUMNS = [
+  { key: 'userId',        header: 'LINE User ID'   }, // A（主キー）
+  { key: 'displayName',   header: 'LINE表示名'     }, // B
+  { key: 'symptom',       header: '症状'           }, // C
+  { key: 'inquiry',       header: '問診内容'       }, // D
+  { key: 'aiSummary',     header: 'AI要約'         }, // E
+  { key: 'postureType',   header: '姿勢タイプ'     }, // F
+  { key: 'stress',        header: 'ストレス'       }, // G
+  { key: 'sleep',         header: '睡眠'           }, // H
+  { key: 'deskWork',      header: 'デスクワーク'   }, // I
+  { key: 'reservation',   header: '予約状況'       }, // J
+  { key: 'supportStatus', header: '対応ステータス' }, // K
+  { key: 'visited',       header: '来院'           }, // L
+  { key: 'continued',     header: '継続'           }, // M
+  { key: 'churned',       header: '離反'           }, // N
+  { key: 'updatedAt',     header: '最終更新日時'   }, // O
+];
 
 // ---- 認証 ---------------------------------------------------------------
 
+/**
+ * Service Account 認証クライアントを生成する
+ *   1. GOOGLE_CREDENTIALS_JSON（環境変数）→ Vercel本番
+ *   2. credentials.json ファイル          → ローカル開発
+ */
 async function getAuthClient() {
   if (process.env.GOOGLE_CREDENTIALS_JSON) {
     let credentials;
@@ -36,115 +78,168 @@ async function getAuthClient() {
   return (new google.auth.GoogleAuth({ keyFile: CREDENTIALS_PATH, scopes: SCOPES })).getClient();
 }
 
-// ---- 追記 ---------------------------------------------------------------
+/**
+ * Sheets API クライアントを取得する（共通処理）
+ */
+async function getSheets() {
+  if (!SPREADSHEET_ID) throw new Error('[sheets.js] SPREADSHEET_ID が未設定です。');
+  const authClient = await getAuthClient();
+  return google.sheets({ version: 'v4', auth: authClient });
+}
 
 /**
- * スプレッドシートに1行追記する
- *
- * @param {Object} params
- * @param {string} params.userId            - N列: LINE userId
- * @param {string} params.displayName       - B列: LINE表示名
- * @param {string} params.symptom           - C列: 症状タイプ
- * @param {string} params.inquiry           - D列: 問診内容（全回答テキスト）
- * @param {string} params.reservationStatus - E列: 予約状況
- * @param {string} [params.postureType]     - F列: 姿勢タイプ
- * @param {string} [params.stress]          - G列: ストレス傾向
- * @param {string} [params.sleep]           - H列: 睡眠
- * @param {string} [params.deskWork]        - I列: デスクワーク傾向
- * @param {string} [params.aiSummary]       - J列: AI要約（サマリー全文）
- * @param {string} [params.visited]         - K列: 来院状況
- * @param {string} [params.continued]       - L列: 継続状況
- * @param {string} [params.churned]         - M列: 離反状況
- * @param {string} [params.supportStatus]   - O列: 対応ステータス
- * @param {string} [params.inquiryCompleted]- P列: 問診完了（'済' or ''）
- *
- * @returns {Promise<number|null>} 書き込んだ行番号
+ * 列番号(0始まり)をスプレッドシートの列名(A,B,...,Z,AA)に変換する
+ * 例: 0→A, 1→B, 25→Z, 26→AA
  */
-async function appendToSheet({
-  userId, displayName, symptom, inquiry, reservationStatus,
-  postureType, stress, sleep, deskWork, aiSummary,
-  visited, continued, churned, supportStatus, inquiryCompleted,
-}) {
-  if (!SPREADSHEET_ID) throw new Error('[sheets.js] SPREADSHEET_ID が未設定です。');
+function columnLetter(index) {
+  let letter = '';
+  let n = index;
+  while (n >= 0) {
+    letter = String.fromCharCode((n % 26) + 65) + letter;
+    n = Math.floor(n / 26) - 1;
+  }
+  return letter;
+}
+
+// 患者マスターの最終列（O列など）を自動計算
+const PATIENT_LAST_COL = columnLetter(PATIENT_COLUMNS.length - 1);
+
+// ---- ① 患者マスター（upsert方式）---------------------------------------
+
+/**
+ * 患者マスターを upsert する（存在すれば更新、なければ新規作成）
+ *
+ * @param {Object} patient - 患者データ（PATIENT_COLUMNS の key に対応）
+ * @param {string} patient.userId        - LINE User ID（主キー・必須）
+ * @param {string} [patient.displayName] - LINE表示名
+ * @param {string} [patient.symptom]     - 症状
+ * @param {string} [patient.inquiry]     - 問診内容
+ * @param {string} [patient.aiSummary]   - AI要約
+ * @param {string} [patient.postureType] - 姿勢タイプ
+ * @param {string} [patient.stress]      - ストレス
+ * @param {string} [patient.sleep]       - 睡眠
+ * @param {string} [patient.deskWork]    - デスクワーク
+ * @param {string} [patient.reservation] - 予約状況
+ * @param {string} [patient.supportStatus] - 対応ステータス
+ * @param {string} [patient.visited]     - 来院
+ * @param {string} [patient.continued]   - 継続
+ * @param {string} [patient.churned]     - 離反
+ *
+ * @returns {Promise<number|null>} 更新/作成した行番号
+ *
+ * 【重要】
+ *   undefined のフィールドは「更新しない」（既存値を保持）。
+ *   空文字 '' を渡すと「空に上書き」される。
+ */
+async function upsertPatient(patient) {
+  if (!patient.userId) throw new Error('[sheets.js] upsertPatient: userId は必須です。');
+
+  const sheets = await getSheets();
+
+  // --- ステップ1: A列（User ID）を全て読み込み、既存行を探す ---
+  const idColumn = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `${PATIENT_SHEET}!A:A`,
+  });
+
+  const ids      = idColumn.data.values ?? []; // [['LINE User ID'], ['Uxxx'], ...]
+  let   rowIndex = -1;                          // 見つかった行番号（1始まり）
+
+  // 1行目はヘッダーなので2行目(index=1)から探す
+  for (let i = 1; i < ids.length; i++) {
+    if (ids[i][0] === patient.userId) {
+      rowIndex = i + 1; // 配列index(0始まり) → 行番号(1始まり)
+      break;
+    }
+  }
+
+  const now = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+
+  if (rowIndex === -1) {
+    // --- 新規作成: 末尾に1行追加 ---
+    // 渡されていないフィールドは空文字にする
+    const row = PATIENT_COLUMNS.map((col) => {
+      if (col.key === 'userId')    return patient.userId;
+      if (col.key === 'updatedAt') return now;
+      return patient[col.key] ?? '';
+    });
+
+    const appendRes = await sheets.spreadsheets.values.append({
+      spreadsheetId:    SPREADSHEET_ID,
+      range:            `${PATIENT_SHEET}!A:${PATIENT_LAST_COL}`,
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody:      { values: [row] },
+    });
+
+    const updatedRange = appendRes.data.updates?.updatedRange ?? '';
+    const match        = updatedRange.match(/(\d+)(?::\w+\d+)?$/);
+    const newRow       = match ? parseInt(match[1], 10) : null;
+
+    console.log(`[sheets.js] 患者マスター 新規作成 row=${newRow}: ${patient.displayName}`);
+    return newRow;
+  }
+
+  // --- 更新: 既存行を読み込み、渡されたフィールドだけ差し替える ---
+  const existingRow = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `${PATIENT_SHEET}!A${rowIndex}:${PATIENT_LAST_COL}${rowIndex}`,
+  });
+  const current = existingRow.data.values?.[0] ?? [];
+
+  const merged = PATIENT_COLUMNS.map((col, i) => {
+    if (col.key === 'updatedAt') return now;             // 更新日時は常に最新
+    if (patient[col.key] !== undefined) return patient[col.key]; // 渡された値で上書き
+    return current[i] ?? '';                             // それ以外は既存値を維持
+  });
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId:    SPREADSHEET_ID,
+    range:            `${PATIENT_SHEET}!A${rowIndex}:${PATIENT_LAST_COL}${rowIndex}`,
+    valueInputOption: 'USER_ENTERED',
+    requestBody:      { values: [merged] },
+  });
+
+  console.log(`[sheets.js] 患者マスター 更新 row=${rowIndex}: ${patient.displayName}`);
+  return rowIndex;
+}
+
+// ---- ② 対応履歴（append方式）-------------------------------------------
+
+/**
+ * 対応履歴に1行追記する（すべての行動ログ）
+ *
+ * @param {Object} log
+ * @param {string} log.userId      - LINE User ID
+ * @param {string} log.displayName - LINE表示名
+ * @param {string} log.eventType   - イベント種別（例: AI問診開始 / 予約 / 来院）
+ * @param {string} [log.content]   - 内容（メッセージ本文や補足）
+ */
+async function appendHistory({ userId, displayName, eventType, content }) {
+  const sheets = await getSheets();
 
   const now = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
   const row = [
-    now,                            // A: 日時
-    displayName       ?? '不明',    // B: LINE表示名
-    symptom           ?? '不明',    // C: 症状タイプ
-    inquiry           ?? '',        // D: 問診内容
-    reservationStatus ?? '未予約',  // E: 予約状況
-    postureType       ?? '',        // F: 姿勢タイプ
-    stress            ?? '',        // G: ストレス
-    sleep             ?? '',        // H: 睡眠
-    deskWork          ?? '',        // I: デスクワーク
-    aiSummary         ?? '',        // J: AI要約
-    visited           ?? '',        // K: 来院
-    continued         ?? '',        // L: 継続
-    churned           ?? '',        // M: 離反
-    userId            ?? '',        // N: ユーザーID
-    supportStatus     ?? 'AI対応中',// O: 対応ステータス
-    inquiryCompleted  ?? '',        // P: 問診完了
+    now,                  // A: 日時
+    userId      ?? '',    // B: LINE User ID
+    displayName ?? '不明',// C: LINE表示名
+    eventType   ?? '',    // D: イベント種別
+    content     ?? '',    // E: 内容
   ];
 
-  const authClient = await getAuthClient();
-  const sheets     = google.sheets({ version: 'v4', auth: authClient });
-
-  const response = await sheets.spreadsheets.values.append({
+  await sheets.spreadsheets.values.append({
     spreadsheetId:    SPREADSHEET_ID,
-    range:            SHEET_RANGE,
+    range:            `${HISTORY_SHEET}!A:E`,
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
     requestBody:      { values: [row] },
   });
 
-  // レスポンスから行番号を抽出（例: "シート1!A3:P3" → 3）
-  const updatedRange = response.data.updates?.updatedRange ?? '';
-  const match        = updatedRange.match(/(\d+)(?::\w+\d+)?$/);
-  const rowNumber    = match ? parseInt(match[1], 10) : null;
-
-  console.log(`[sheets.js] 追記完了 row=${rowNumber}: ${displayName} / ${symptom}`);
-  return rowNumber;
+  console.log(`[sheets.js] 対応履歴 追記: ${eventType} / ${displayName}`);
 }
 
-// ---- 更新 ---------------------------------------------------------------
-
-/**
- * K（来院）・L（継続）・M（離反）列を更新する
- */
-async function updateUserStatus(rowNumber, { visited, continued, churned } = {}) {
-  if (!rowNumber) return;
-  if (!SPREADSHEET_ID) throw new Error('[sheets.js] SPREADSHEET_ID が未設定です。');
-
-  const data = [];
-  if (visited   !== undefined) data.push({ range: `${SHEET_NAME}!K${rowNumber}`, values: [[visited]]   });
-  if (continued !== undefined) data.push({ range: `${SHEET_NAME}!L${rowNumber}`, values: [[continued]] });
-  if (churned   !== undefined) data.push({ range: `${SHEET_NAME}!M${rowNumber}`, values: [[churned]]   });
-  if (data.length === 0) return;
-
-  const sheets = google.sheets({ version: 'v4', auth: await getAuthClient() });
-  await sheets.spreadsheets.values.batchUpdate({
-    spreadsheetId: SPREADSHEET_ID,
-    requestBody:   { valueInputOption: 'USER_ENTERED', data },
-  });
-  console.log(`[sheets.js] CRMステータス更新 row=${rowNumber}`);
-}
-
-/**
- * O列（対応ステータス）を更新する
- * @param {string} status - 'AI対応中' / '有人対応中' / '問診完了'
- */
-async function updateSupportStatus(rowNumber, status) {
-  if (!rowNumber || !SPREADSHEET_ID) return;
-
-  const sheets = google.sheets({ version: 'v4', auth: await getAuthClient() });
-  await sheets.spreadsheets.values.update({
-    spreadsheetId:    SPREADSHEET_ID,
-    range:            `${SHEET_NAME}!O${rowNumber}`,
-    valueInputOption: 'USER_ENTERED',
-    requestBody:      { values: [[status]] },
-  });
-  console.log(`[sheets.js] 対応ステータス更新 row=${rowNumber}: ${status}`);
-}
-
-module.exports = { appendToSheet, updateUserStatus, updateSupportStatus };
+module.exports = {
+  upsertPatient,
+  appendHistory,
+  PATIENT_COLUMNS, // セットアップ用にエクスポート
+};
