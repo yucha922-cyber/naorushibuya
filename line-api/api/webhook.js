@@ -27,7 +27,7 @@ const { upsertPatient, getPatient, appendHistory } = require('../utils/sheets');
 const { getQuestion, isCompleted, formatAnswers } = require('../utils/inquiry');
 const { RICH_MENU_ACTIONS }                                    = require('../utils/richMenu');
 const {
-  getUserData, getMode, setMode,
+  getUserData, getMode, setMode, updateUserData,
   getConversationHistory, saveConversation,
   getInquiryStep, startInquiry, saveAnswerAndAdvance,
   resetInquiry, getInquiryAnswers,
@@ -63,6 +63,12 @@ const COMPLETE_KEYWORDS = ['#完了', '＃完了', '対応完了'];
 
 // 問診キャンセルキーワード
 const CANCEL_KEYWORDS   = ['キャンセル', 'やめる', 'やめます', 'やめたい', 'もういい'];
+
+// 有人モードの自動復帰までの時間（時間単位）
+// スタッフが対応完了後にAIへ戻し忘れても、最後のやり取りから
+// この時間が経過すれば自動でAIモードに戻る。
+// ※ ここの数字を変えるだけで復帰時間を調整できます（例: 6 → 6時間）。
+const HUMAN_AUTO_REVERT_HOURS = 3;
 
 // ---- ルーティング --------------------------------------------------------
 
@@ -168,6 +174,7 @@ async function handleEvent(event) {
   let mode        = 'ai';
   let inquiryStep = 0;
   let history     = [];
+  let reserved    = false; // 予約確定フラグ（true ならAIを起動しない）
 
   try {
     const [userData, hist, step] = await Promise.all([
@@ -178,6 +185,23 @@ async function handleEvent(event) {
     mode        = userData.mode ?? 'ai';
     history     = hist;
     inquiryStep = step;
+    reserved    = userData.reserved === true;
+
+    // ---- 有人モードの自動復帰 -------------------------------------------
+    // スタッフが対応完了後にAIへ戻し忘れても、最後のやり取りから
+    // 一定時間（HUMAN_AUTO_REVERT_HOURS）が経過していれば自動でAIモードに戻す。
+    // ※ 予約確定ユーザー（reserved）は自動復帰の対象外（AIを起動しない）。
+    if (!reserved && mode === 'human' && userData.lastMessageAt) {
+      const elapsedMs   = Date.now() - new Date(userData.lastMessageAt).getTime();
+      const elapsedHour = elapsedMs / (1000 * 60 * 60);
+      if (elapsedHour >= HUMAN_AUTO_REVERT_HOURS) {
+        console.log(`[webhook] 有人モード自動復帰（${elapsedHour.toFixed(1)}h経過）: ${userId}`);
+        await setModeSafe(userId, 'ai');
+        await safe('問診リセット', () => resetInquiry(userId));
+        mode        = 'ai';
+        inquiryStep = 0;
+      }
+    }
   } catch (err) {
     console.error('[webhook] Redis取得失敗（AIモードで続行）:', err.message);
   }
@@ -186,6 +210,8 @@ async function handleEvent(event) {
   if (RESET_KEYWORDS.some((kw) => userText.includes(kw))) {
     await setModeSafe(userId, 'ai');
     await safe('問診リセット', () => resetInquiry(userId));
+    // 予約確定フラグも解除（AIを再び使えるようにする）
+    await safe('予約確定解除', () => updateUserData(userId, { reserved: false }));
     savePatient({ userId, displayName, supportStatus: 'AI対応中' });
     return reply(event.replyToken, 'AI問診を再開します。\nメニューの「簡単AI診断」か、お悩みをそのままメッセージで送ってください。');
   }
@@ -197,10 +223,22 @@ async function handleEvent(event) {
     return null; // スタッフが最後のメッセージを送る
   }
 
+  // ---- ②.5 予約確定ユーザー → AIを起動しない（スタッフ対応のまま）-------
+  // 予約済みの方には自動AI返信をせず、スタッフが手動で対応する。
+  // 解除するには #ai を送る（スタッフ）か、setReserved スクリプトで off にする。
+  if (reserved) {
+    logHistory({ userId, displayName, eventType: '予約確定ユーザーメッセージ', content: userText });
+    // 予約確定フラグのTTL（24時間）を延長し続ける（発言があるたびに更新）
+    await safe('最終時刻更新', () => updateUserData(userId, { lastMessageAt: new Date().toISOString() }));
+    return null; // AIは返信しない
+  }
+
   // ---- ③ 有人対応中 → AIスキップ、記録のみ ---------------------------
   if (mode === 'human') {
     // 患者マスターは状態維持。発言は対応履歴にのみ記録
     logHistory({ userId, displayName, eventType: 'スタッフ対応中メッセージ', content: userText });
+    // 自動復帰タイマーをリセット（対応中はユーザー発言のたびに最終時刻を更新）
+    await safe('最終時刻更新', () => updateUserData(userId, { lastMessageAt: new Date().toISOString() }));
     return null; // AIは返信しない（スタッフが手動で返信）
   }
 
