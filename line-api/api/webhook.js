@@ -379,7 +379,8 @@ async function handleInquiryComplete(replyToken, userId, displayName) {
   await savePatient({
     userId,
     displayName,
-    symptom:       summary.symptomType,
+    // C列「症状」= ユーザーが①で回答した症状そのもの（例: だるい）
+    symptom:       answers.symptom ?? '',
     inquiry:       inquiryText,
     // aiSummary = 施術者向け仮説要約（OpenAIが生成した1文）
     aiSummary:     summary.aiSummary
