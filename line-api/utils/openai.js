@@ -69,33 +69,59 @@ const CHAT_SYSTEM_PROMPT = `
 const SUMMARY_SYSTEM_PROMPT = `
 あなたはNAORU整体 渋谷院のAIアシスタントです。
 
-患者の問診回答をもとに、以下を日本語で生成してください。
+患者の問診回答をもとに、以下をすべて日本語で判定・生成してください。
 
 【NAORU整体のコンセプト】
-根本改善重視。姿勢だけを原因と決めつけず、
-筋肉・関節・神経・血流・生活習慣・ストレスを総合的に考察してください。
+根本改善重視。筋肉・関節・神経・血流・生活習慣・ストレスを総合的に考察する。
 
-【施術者向け要約（aiSummary）の形式】
-施術者が初回施術の仮説を立てられるよう、以下の情報を40〜60文字で1文にまとめてください。
-- 仕事・座位時間（デスクワーク状況）
-- 睡眠時間
-- ストレスレベル
-- 主な症状・発症時期
-- 推定される身体的問題（筋緊張部位・可動域制限など）
+---
 
-形式例:
-『デスクワーク8時間以上。睡眠5時間未満。ストレス高め。慢性的肩こり。首肩周囲の筋緊張と胸郭可動性低下が疑われる。』
+【判定項目】
+
+■ 姿勢タイプ（1つ選ぶ）
+猫背型 / 反り腰型 / ストレートネック型 / 巻き肩型 / 骨盤不安定型 / 複合型
+
+■ ストレス評価（1つ選ぶ）
+低（0〜3） / 中（4〜6） / 高（7〜10）
+
+■ 睡眠評価（1つ選ぶ）
+良好（6時間以上） / 普通（4〜6時間） / 不足（4時間未満）
+
+■ デスクワーク評価（1つ選ぶ）
+高（デスクワーク中心・はい） / 低（デスクワークでない・いいえ）
+
+■ 危険度（1つ選ぶ）
+低（痛みレベル0〜3・症状短期） / 中（痛みレベル4〜6 or 症状長期） / 高（痛みレベル7〜10 or 重篤症状）
+
+■ 推奨施術（以下の中から最適な1つを選ぶ）
+首肩集中整体 / 腰痛整体 / 骨盤矯正 / 姿勢改善整体 / 自律神経整体 / 全身調整整体
+
+■ AI要約
+以下の形式で100文字以内の1〜2文にまとめる:
+「症状名が症状期間継続。デスクワーク状況。睡眠評価。ストレス評価。姿勢・生活習慣由来の〇〇の可能性が高い。」
+
+例:
+「首肩こりが半年以上継続。デスクワーク中心。睡眠5時間。ストレス高め。姿勢由来および生活習慣由来の可能性が高い。」
+
+■ LINEへの返答文（lineReply）
+・分析結果を患者にわかりやすく伝える（2〜3文）
+・原因の仮説を1〜2つ提示する
+・NAORU整体での改善方法に触れる
+・予約URLを案内する
+・絵文字なし・押しつけがましくない表現で
+
+---
 
 必ずJSON形式のみで返してください:
 {
-  "summary": "問診結果のまとめ（2〜3文。患者に読みやすい表現で）",
-  "hypothesis": "考えられる主な原因と仮説（2〜3文。複数の視点から）",
-  "visitMerit": "NAORU整体に来院するメリット（2〜3文。押しつけにならない表現で）",
-  "lineReply": "LINEで送る完成した返答文（summary + hypothesis + visitMerit を統合した自然な文章。予約URLの案内も含める。絵文字なし）",
-  "symptomType": "症状タイプ（筋肉疲労型/神経圧迫型/血流不全型/関節可動域制限型/複合型）",
-  "postureType": "姿勢タイプ（猫背型/反り腰型/側弯傾向/前傾骨盤型/後傾骨盤型/不明）",
-  "riskScore": 危険度スコア（整数1〜5）,
-  "aiSummary": "施術者向け要約（上記の形式例に沿った40〜60文字の1文）"
+  "postureType":          "姿勢タイプ（猫背型/反り腰型/ストレートネック型/巻き肩型/骨盤不安定型/複合型）",
+  "stressLevel":          "ストレス評価（低/中/高）",
+  "sleepLevel":           "睡眠評価（良好/普通/不足）",
+  "deskWorkLevel":        "デスクワーク評価（高/低）",
+  "riskLevel":            "危険度（低/中/高）",
+  "recommendedTreatment": "推奨施術（6択から1つ）",
+  "aiSummary":            "AI要約（100文字以内の1〜2文）",
+  "lineReply":            "LINEへの返答文（予約URL含む）"
 }
 `.trim();
 
@@ -144,23 +170,22 @@ async function analyzeInquiry(userMessage, conversationHistory = []) {
 }
 
 /**
- * 9問の問診回答をもとにAIサマリーを生成する
- * @param {Object} answers - { symptom, duration, jobType, sittingHours, sleep, stress, pain, hospital, goal }
+ * 10問の問診回答をもとにAIサマリーを生成する
+ * @param {Object} answers    - { fullName, symptom, symptomDuration, deskWorkRaw, sleepRaw, pain, hospital, stress, exercise }
  * @param {string} reserveUrl - 予約URL（返答文に埋め込む）
- * @returns {Promise<Object>} { summary, hypothesis, visitMerit, lineReply, symptomType, postureType, riskScore, aiSummary }
+ * @returns {Promise<Object>} { postureType, stressLevel, sleepLevel, deskWorkLevel, riskLevel, recommendedTreatment, aiSummary, lineReply }
  */
 async function generateInquirySummary(answers, reserveUrl) {
-  // 回答を読みやすい形式に変換してプロンプトに渡す
   const answersText = [
-    `症状: ${answers.symptom      ?? '未回答'}`,
-    `発症時期: ${answers.duration ?? '未回答'}`,
-    `仕事内容: ${answers.jobType  ?? '未回答'}`,
-    `座位時間: ${answers.sittingHours ?? '未回答'}`,
-    `睡眠時間: ${answers.sleep    ?? '未回答'}`,
-    `ストレスレベル: ${answers.stress ?? '未回答'}/5`,
-    `痛みレベル: ${answers.pain   ?? '未回答'}/10`,
-    `受診歴: ${answers.hospital   ?? '未回答'}`,
-    `改善したいこと: ${answers.goal ?? '未回答'}`,
+    `氏名: ${answers.fullName         ?? '未回答'}`,
+    `症状: ${answers.symptom          ?? '未回答'}`,
+    `症状期間: ${answers.symptomDuration ?? '未回答'}`,
+    `デスクワーク: ${answers.deskWorkRaw ?? '未回答'}`,
+    `睡眠時間: ${answers.sleepRaw     ?? '未回答'}`,
+    `痛みレベル: ${answers.pain       ?? '未回答'}/10`,
+    `受診歴: ${answers.hospital       ?? '未回答'}`,
+    `ストレスレベル: ${answers.stress ?? '未回答'}/10`,
+    `運動習慣: ${answers.exercise     ?? '未回答'}`,
   ].join('\n');
 
   const userContent = `
@@ -191,14 +216,14 @@ ${answersText}
   }
 
   return {
-    summary:      result.summary     ?? '',
-    hypothesis:   result.hypothesis  ?? '',
-    visitMerit:   result.visitMerit  ?? '',
-    lineReply:    result.lineReply   ?? buildSummaryFallback().lineReply,
-    symptomType:  result.symptomType ?? '不明',
-    postureType:  result.postureType ?? '不明',
-    riskScore:    result.riskScore   ?? 1,
-    aiSummary:    result.aiSummary   ?? '',
+    postureType:          result.postureType          ?? '不明',
+    stressLevel:          result.stressLevel          ?? '不明',
+    sleepLevel:           result.sleepLevel           ?? '不明',
+    deskWorkLevel:        result.deskWorkLevel        ?? '不明',
+    riskLevel:            result.riskLevel            ?? '不明',
+    recommendedTreatment: result.recommendedTreatment ?? '全身調整整体',
+    aiSummary:            result.aiSummary            ?? '',
+    lineReply:            result.lineReply            ?? buildSummaryFallback().lineReply,
   };
 }
 
@@ -215,13 +240,14 @@ function buildChatFallback() {
 
 function buildSummaryFallback() {
   return {
-    summary:     '問診が完了しました。詳しくはスタッフにご相談ください。',
-    hypothesis:  '',
-    visitMerit:  '',
-    lineReply:   '問診ありがとうございました。\nスタッフより詳しいご案内をいたします。',
-    symptomType: '不明',
-    postureType: '不明',
-    riskScore:   1,
+    postureType:          '不明',
+    stressLevel:          '不明',
+    sleepLevel:           '不明',
+    deskWorkLevel:        '不明',
+    riskLevel:            '不明',
+    recommendedTreatment: '全身調整整体',
+    aiSummary:            '',
+    lineReply:            '問診ありがとうございました。\nスタッフより詳しいご案内をいたします。',
   };
 }
 
