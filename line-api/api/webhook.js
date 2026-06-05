@@ -24,7 +24,7 @@ const line    = require('@line/bot-sdk');
 
 const { analyzeInquiry, generateInquirySummary } = require('../utils/openai');
 const { upsertPatient, getPatient, appendHistory } = require('../utils/sheets');
-const { getQuestion, isCompleted, formatAnswers } = require('../utils/inquiry');
+const { getQuestion, isAnalysisStep, isCompleted, formatAnswers } = require('../utils/inquiry');
 const { RICH_MENU_ACTIONS }                                    = require('../utils/richMenu');
 const {
   getUserData, getMode, setMode, updateUserData,
@@ -153,7 +153,7 @@ async function handleEvent(event) {
     const displayName = await getDisplayName(userId);
 
     // 患者マスターに登録（新規作成）
-    await savePatient({ userId, displayName, supportStatus: 'AI対応中', reservation: '未予約' });
+    await savePatient({ userId, displayName, supportStatus: 'AI対応中' });
     // 対応履歴に記録
     await logHistory({ userId, displayName, eventType: '友だち追加', content: '' });
 
@@ -302,16 +302,12 @@ async function handleEvent(event) {
   await savePatient({
     userId, displayName,
     symptom:       aiResult.symptomType,
-    inquiry:       userText,
-    aiSummary:     `[危険度:${aiResult.riskScore}] ${aiResult.aiSummary}`,
+    aiSummary:     aiResult.aiSummary,
     postureType:   aiResult.postureType,
     stress:        aiResult.stress,
     deskWork:      aiResult.deskWork,
-    reservation:   aiResult.needsReservation ? '予約推奨' : '未予約',
     supportStatus: 'AI対応中',
-    // 来院を検出したら来院・継続・初回/最終来院日・予約回数を更新
     ...visitUpdate,
-    // 離反を検出したら該当列も更新
     ...(aiResult.churnDetected ? { churned: '離反' } : {}),
   });
 
@@ -329,7 +325,7 @@ async function handleEvent(event) {
 
 /**
  * 問診の各ステップを処理する
- * 回答を保存 → 次の質問 or 全問完了時にサマリー生成
+ * 回答を保存 → 次の質問 or step10（AI分析中メッセージ）→ サマリー生成
  */
 async function handleInquiryStep(replyToken, userId, displayName, userText, currentStep) {
   const currentQuestion = getQuestion(currentStep);
@@ -343,7 +339,13 @@ async function handleInquiryStep(replyToken, userId, displayName, userText, curr
     () => saveAnswerAndAdvance(userId, currentQuestion.key, userText)
   ) ?? currentStep + 1;
 
-  // 全6問終了？
+  // Q10: 「AI分析を開始します」メッセージを送ってからサマリー生成
+  if (isAnalysisStep(nextStep)) {
+    await reply(replyToken, 'Q10. AI分析を開始します。\n少々お待ちください...');
+    return handleInquiryComplete(null, userId, displayName);
+  }
+
+  // 全問終了
   if (isCompleted(nextStep)) {
     return handleInquiryComplete(replyToken, userId, displayName);
   }
@@ -353,48 +355,43 @@ async function handleInquiryStep(replyToken, userId, displayName, userText, curr
 }
 
 /**
- * 全6問終了後の処理
- * OpenAI でサマリー・原因仮説・来院メリットを生成し、Sheetsに保存してユーザーに返答
+ * 全9問終了後の処理
+ * OpenAI で各種判定・要約を生成し、Sheetsに保存してユーザーに結果を返信
  */
 async function handleInquiryComplete(replyToken, userId, displayName) {
   const answers = await safe('回答取得', () => getInquiryAnswers(userId)) ?? {};
 
-  // OpenAI にサマリーを依頼（3〜5秒かかる場合があります）
+  // OpenAI にサマリーを依頼
   let summary;
   try {
     summary = await generateInquirySummary(answers, RESERVE_URL);
   } catch (err) {
     console.error('[webhook] サマリー生成失敗:', err.message);
     summary = {
-      lineReply:   `診断ありがとうございました。\nスタッフより詳しいご案内をいたします。\n\n▼初回予約（3,500円）\n${RESERVE_URL}`,
-      symptomType: '不明', postureType: '不明', riskScore: 1,
-      summary: '', hypothesis: '',
+      postureType: '不明', stressLevel: '不明', sleepLevel: '不明',
+      deskWorkLevel: '不明', riskLevel: '不明',
+      recommendedTreatment: '全身調整整体', aiSummary: '',
+      lineReply: `診断ありがとうございました。\nスタッフより詳しいご案内をいたします。\n\n▼初回予約（3,500円）\n${RESERVE_URL}`,
     };
   }
 
-  const inquiryText = formatAnswers(answers); // 全6問の回答をテキスト化
+  const inquiryText = formatAnswers(answers);
 
-  // 患者マスターを upsert（問診結果で更新）
-  // ※ Vercelは応答を返すと関数が終了するため、reply前に必ず await する
+  // 患者マスターを upsert（問診結果で全列更新）
   await savePatient({
     userId,
     displayName,
-    // C列「症状」= ユーザーが①で回答した症状そのもの（例: だるい）
-    symptom:       answers.symptom ?? '',
-    inquiry:       inquiryText,
-    // aiSummary = 施術者向け仮説要約（OpenAIが生成した1文）
-    aiSummary:     summary.aiSummary
-                     ? `[危険度:${summary.riskScore}] ${summary.aiSummary}`
-                     : `[危険度:${summary.riskScore}] ${summary.summary ?? ''}`.trim(),
-    postureType:   summary.postureType,
-    // 9問の回答から各列にマッピング
-    stress:        answers.stress        ?? '',
-    sleep:         answers.sleep         ?? '',
-    deskWork:      answers.sittingHours
-                     ? `${answers.jobType ?? ''} / 座位${answers.sittingHours}`
-                     : (answers.jobType  ?? ''),
-    reservation:   '問診完了',
-    supportStatus: '問診完了',
+    fullName:             answers.fullName         ?? '',
+    symptom:              answers.symptom          ?? '',
+    symptomDuration:      answers.symptomDuration  ?? '',
+    postureType:          summary.postureType,
+    stress:               summary.stressLevel,
+    sleep:                summary.sleepLevel,
+    deskWork:             summary.deskWorkLevel,
+    riskLevel:            summary.riskLevel,
+    aiSummary:            summary.aiSummary,
+    recommendedTreatment: summary.recommendedTreatment,
+    supportStatus:        '問診完了',
   });
 
   // 対応履歴に「AI問診完了」を記録
@@ -403,7 +400,12 @@ async function handleInquiryComplete(replyToken, userId, displayName) {
   // 問診ステップをリセット
   await safe('問診リセット', () => resetInquiry(userId));
 
-  return reply(replyToken, summary.lineReply);
+  // Q10で replyToken を使い切っている場合は pushMessage で送る
+  if (replyToken) {
+    return reply(replyToken, summary.lineReply);
+  } else {
+    return client.pushMessage(userId, { type: 'text', text: summary.lineReply });
+  }
 }
 
 module.exports = app;

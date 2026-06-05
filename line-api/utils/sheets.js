@@ -44,28 +44,29 @@ const HISTORY_SHEET = '対応履歴';
 // header   : スプレッドシート1行目に入れるヘッダー名
 
 const PATIENT_COLUMNS = [
-  { key: 'userId',        header: 'LINE User ID'   }, // A（主キー）
-  { key: 'displayName',   header: 'LINE表示名'     }, // B
-  { key: 'symptom',       header: '症状'           }, // C
-  { key: 'inquiry',       header: '問診内容'       }, // D
-  { key: 'aiSummary',     header: 'AI要約'         }, // E
-  { key: 'postureType',   header: '姿勢タイプ'     }, // F
-  { key: 'stress',        header: 'ストレス'       }, // G
-  { key: 'sleep',         header: '睡眠'           }, // H
-  { key: 'deskWork',      header: 'デスクワーク'   }, // I
-  { key: 'reservation',   header: '予約状況'       }, // J
-  { key: 'supportStatus', header: '対応ステータス' }, // K
-  { key: 'visited',       header: '来院'           }, // L
-  { key: 'continued',     header: '継続'           }, // M
-  { key: 'churned',       header: '離反'           }, // N
-  // ---- CRM強化列（整体院向け）----
-  { key: 'firstVisitAt',  header: '初回来院日'     }, // O  来院分析
-  { key: 'lastVisitAt',   header: '最終来院日'     }, // P  再来管理
-  { key: 'staff',         header: '担当者'         }, // Q  誰が対応したか
-  { key: 'visitCount',    header: '予約回数'       }, // R  継続率分析
-  { key: 'ltv',           header: 'LTV'            }, // S  顧客価値分析
-  { key: 'referrer',      header: '紹介者'         }, // T  紹介管理
-  { key: 'updatedAt',     header: '最終更新日時'   }, // U
+  { key: 'userId',               header: 'LINE User ID'    }, // A（主キー）
+  { key: 'displayName',          header: 'LINE表示名'      }, // B
+  { key: 'fullName',             header: '氏名'            }, // C  Q1回答
+  { key: 'symptom',              header: '症状'            }, // D  Q2回答
+  { key: 'symptomDuration',      header: '症状期間'        }, // E  Q3回答
+  { key: 'postureType',          header: '姿勢タイプ'      }, // F  AI判定
+  { key: 'stress',               header: 'ストレス評価'    }, // G  AI判定（低/中/高）
+  { key: 'sleep',                header: '睡眠評価'        }, // H  AI判定（良好/普通/不足）
+  { key: 'deskWork',             header: 'デスクワーク評価'}, // I  AI判定（高/中/低）
+  { key: 'riskLevel',            header: '危険度'          }, // J  AI判定（低/中/高）
+  { key: 'aiSummary',            header: 'AI要約'          }, // K  施術者向け1文
+  { key: 'recommendedTreatment', header: '推奨施術'        }, // L  AI判定
+  { key: 'supportStatus',        header: '対応ステータス'  }, // M
+  { key: 'visited',              header: '来院'            }, // N
+  { key: 'continued',            header: '継続'            }, // O
+  { key: 'churned',              header: '離反'            }, // P
+  { key: 'firstVisitAt',         header: '初回来院日'      }, // Q
+  { key: 'lastVisitAt',          header: '最終来院日'      }, // R
+  { key: 'staff',                header: '担当者'          }, // S
+  { key: 'visitCount',           header: '予約回数'        }, // T
+  { key: 'ltv',                  header: 'LTV'             }, // U
+  { key: 'referrer',             header: '紹介者'          }, // V
+  { key: 'updatedAt',            header: '最終更新日時'    }, // W
 ];
 
 // ---- 認証 ---------------------------------------------------------------

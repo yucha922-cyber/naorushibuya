@@ -1,82 +1,90 @@
 /**
- * AI問診ステップ管理
+ * AI問診ステップ管理（NAORU整体向け 10ステップ）
  *
- * ステップ番号の意味:
- *   0     : 問診未開始
- *   1〜9  : 各質問を待っている状態（質問済み・回答待ち）
- *   10以上: 全質問終了 → OpenAI要約生成へ
+ *   step 0     : 未開始
+ *   step 1〜9  : 各質問を待っている状態
+ *   step 10    : Q10「AI分析中」メッセージを送信 → サマリー生成
+ *   step 11以上: 完了
  */
 
 const QUESTIONS = [
   {
     step:  1,
-    key:   'symptom',
-    label: '症状',
-    text:  '①どのようなお悩みがありますか？\n\n（例: 肩こり・腰痛・頭痛・膝の痛み・疲れが取れない　など、複数でも大丈夫です）',
+    key:   'fullName',
+    label: 'お名前',
+    text:  'Q1. お名前（フルネーム）を教えてください。',
   },
   {
     step:  2,
-    key:   'duration',
-    label: '発症時期',
-    text:  '②いつ頃からその症状がありますか？\n\n（例: 1週間前から・半年以上前から・気づいたら慢性的に　など）',
+    key:   'symptom',
+    label: '症状',
+    text:  'Q2. 現在一番気になる症状は何ですか？\n\n① 肩こり・首こり\n② 頭痛\n③ 腰痛\n④ 坐骨神経痛\n⑤ 膝痛\n⑥ 姿勢が気になる\n⑦ 自律神経の乱れ\n⑧ その他\n\n番号またはそのままお答えください。',
   },
   {
     step:  3,
-    key:   'jobType',
-    label: '仕事内容',
-    text:  '③お仕事の内容を教えてください。\n\n（例: デスクワーク・接客・立ち仕事・力仕事・在宅勤務　など）',
+    key:   'symptomDuration',
+    label: '症状期間',
+    text:  'Q3. その症状はいつ頃からありますか？\n\n① 1週間以内\n② 1か月以内\n③ 3か月以上\n④ 半年以上\n⑤ 1年以上\n\n番号またはそのままお答えください。',
   },
   {
     step:  4,
-    key:   'sittingHours',
-    label: '座位時間',
-    text:  '④1日のうち、座っている時間はどのくらいですか？\n\n（例: 2時間未満・4〜6時間・8時間以上　など）',
+    key:   'deskWorkRaw',
+    label: 'デスクワーク',
+    text:  'Q4. お仕事はデスクワーク中心ですか？\n\n① はい\n② いいえ\n\n番号またはそのままお答えください。',
   },
   {
     step:  5,
-    key:   'sleep',
+    key:   'sleepRaw',
     label: '睡眠時間',
-    text:  '⑤1日の平均睡眠時間を教えてください。\n\n（例: 5時間・7時間・バラバラ　など）',
+    text:  'Q5. 1日の平均睡眠時間は？\n\n① 4時間未満\n② 4〜6時間\n③ 6〜8時間\n④ 8時間以上\n\n番号またはそのままお答えください。',
   },
   {
     step:  6,
-    key:   'stress',
-    label: 'ストレスレベル',
-    text:  '⑥最近のストレスレベルを教えてください。\n\n1 = ほとんどない\n5 = 非常に高い\n\n数字1つでお答えください。',
+    key:   'pain',
+    label: '痛みレベル',
+    text:  'Q6. 現在の痛みを0〜10で教えてください。\n\n0 = 痛みなし　10 = 激痛\n\n数字1つでお答えください。',
   },
   {
     step:  7,
-    key:   'pain',
-    label: '痛みレベル',
-    text:  '⑦現在のつらさ・痛みを10段階で教えてください。\n\n1 = ほとんど気にならない\n10 = 日常生活に支障がある\n\n数字1つでお答えください。',
+    key:   'hospital',
+    label: '受診歴',
+    text:  'Q7. 過去に病院・整形外科・整骨院・整体などに通いましたか？\n\n① はい\n② いいえ\n\n番号またはそのままお答えください。',
   },
   {
     step:  8,
-    key:   'hospital',
-    label: '受診歴',
-    text:  '⑧過去に病院・整形外科・接骨院などを受診したことはありますか？\n\n「はい」「いいえ」「現在も通院中」でお答えください。',
+    key:   'stress',
+    label: 'ストレスレベル',
+    text:  'Q8. 現在のストレスを0〜10で表すと？\n\n0 = ほぼない　10 = 非常に高い\n\n数字1つでお答えください。',
   },
   {
     step:  9,
-    key:   'goal',
-    label: '改善したいこと',
-    text:  '⑨最後に、一番改善したいことを教えてください。\n\n（例: 痛みをなくしたい・仕事に集中できるようにしたい・ぐっすり眠れるようになりたい　など）',
+    key:   'exercise',
+    label: '運動習慣',
+    text:  'Q9. 運動習慣はありますか？\n\n① 週3回以上\n② 週1〜2回\n③ ほぼしない\n\n番号またはそのままお答えください。',
   },
 ];
+
+// Q10 は「AI分析開始」メッセージを送るだけ（質問なし）
+const ANALYSIS_STEP = 10;
 
 function getQuestion(step) {
   return QUESTIONS.find((q) => q.step === step) ?? null;
 }
 
+// step 10 = 分析メッセージ送信、step 11以上 = 完了
+function isAnalysisStep(step) {
+  return step === ANALYSIS_STEP;
+}
+
 function isCompleted(step) {
-  return step > QUESTIONS.length;
+  return step > ANALYSIS_STEP;
 }
 
 /**
- * 回答オブジェクトを読みやすい文字列に変換する（Sheets保存用）
+ * 回答オブジェクトを読みやすい文字列に変換する（問診内容列・AI送信用）
  */
 function formatAnswers(answers) {
   return QUESTIONS.map((q) => `${q.label}: ${answers[q.key] ?? '未回答'}`).join('\n');
 }
 
-module.exports = { QUESTIONS, getQuestion, isCompleted, formatAnswers };
+module.exports = { QUESTIONS, ANALYSIS_STEP, getQuestion, isAnalysisStep, isCompleted, formatAnswers };
