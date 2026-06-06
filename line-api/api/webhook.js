@@ -386,7 +386,12 @@ async function handleInquiryComplete(replyToken, userId, displayName) {
   // AI要約が空ならコード側で簡易要約を組み立てる（空欄を防ぐ）
   const aiSummary = ai.aiSummary && ai.aiSummary.trim()
     ? ai.aiSummary
-    : `${answers.symptom ?? ''}（${answers.symptomDuration ?? ''}）。デスクワーク${deskWorkLevel}・睡眠${sleepLevel}・ストレス${stressLevel}・危険度${riskLevel}。`;
+    : `${answers.symptom ?? ''}（${answers.symptomDuration ?? ''}）。デスクワーク${deskWorkLevel}・睡眠${sleepLevel}・ストレス${stressLevel}・危険度${riskLevel}。${
+        deskWorkLevel === '高' && stressLevel === '高' ? '姿勢由来および生活習慣・ストレス由来の可能性が高い。' :
+        deskWorkLevel === '高' ? '姿勢由来および生活習慣由来の可能性が高い。' :
+        stressLevel === '高' ? 'ストレス由来および自律神経由来の可能性が高い。' :
+        '姿勢・生活習慣由来の可能性が高い。'
+      }`;
 
   const inquiryText = formatAnswers(answers);
 
