@@ -238,30 +238,43 @@
             仕事のパフォーマンスが、身体の重さに引っ張られている
           </li>
         </ul>
-
-        <div class="worries-new__cta-block">
-          <p class="worries-new__cta-lead">ひとつでも当てはまった方へ —</p>
-          <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="btn btn--line">LINEであなたの症状を無料AI診断</a>
-          <p class="worries-new__cta-note">無料・1分で完了・友だち追加するだけ</p>
-        </div>
       </div>
     </div>
 
-    <!-- シーン写真3枚 -->
+    <!-- フルワイドCTAブロック＋下矢印 -->
+    <div class="worries-new__cta-block reveal">
+      <p class="worries-new__cta-lead">ひとつでも当てはまった方へ —</p>
+      <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="btn btn--line">LINEであなたの症状を無料AI診断</a>
+      <p class="worries-new__cta-note">無料・1分で完了・友だち追加するだけ</p>
+      <div class="worries-new__arrow" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- シーン写真3枚（クリックでLINEへ） -->
     <div class="worries-new__scenes reveal">
       <figure class="worries-new__scene">
-        <img src="assets/img/worries/scene-shoulder.jpg" alt="首・肩こりの施術風景" loading="lazy"
-          onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
+        <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで首・肩こりを無料AI診断">
+          <img src="assets/img/worries/scene-shoulder.jpg" alt="首・肩こりの施術風景" loading="lazy"
+            onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
+          <div class="worries-new__scene-overlay"><span>LINEで無料診断 →</span></div>
+        </a>
         <figcaption>首・肩こり</figcaption>
       </figure>
       <figure class="worries-new__scene">
-        <img src="assets/img/worries/scene-back.jpg" alt="腰痛・骨盤の施術風景" loading="lazy"
-          onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
+        <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで腰痛・骨盤を無料AI診断">
+          <img src="assets/img/worries/scene-back.jpg" alt="腰痛・骨盤の施術風景" loading="lazy"
+            onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
+          <div class="worries-new__scene-overlay"><span>LINEで無料診断 →</span></div>
+        </a>
         <figcaption>腰痛・骨盤</figcaption>
       </figure>
       <figure class="worries-new__scene">
-        <img src="assets/img/worries/scene-posture.jpg" alt="姿勢改善の施術風景" loading="lazy"
-          onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
+        <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで姿勢の乱れを無料AI診断">
+          <img src="assets/img/worries/scene-posture.jpg" alt="姿勢改善の施術風景" loading="lazy"
+            onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
+          <div class="worries-new__scene-overlay"><span>LINEで無料診断 →</span></div>
+        </a>
         <figcaption>姿勢の乱れ</figcaption>
       </figure>
     </div>
