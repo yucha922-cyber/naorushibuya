@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="540" viewBox="0 0 540 540" role="img" aria-label="Instagram投稿の写真">
+  <rect width="540" height="540" fill="#f5f7fa"/>
+  <rect x="0.5" y="0.5" width="539" height="539" fill="none" stroke="#e5eaf0"/>
+  <g fill="none" stroke="#c2ccda" stroke-width="6">
+    <rect x="200" y="200" width="140" height="140" rx="28"/>
+    <circle cx="270" cy="270" r="34"/>
+    <circle cx="318" cy="222" r="9" fill="#c2ccda" stroke="none"/>
+  </g>
+  <text x="270" y="392" text-anchor="middle" font-family="'Helvetica Neue',Arial,sans-serif" font-size="22" fill="#8a95a5">@naoru_group</text>
+  <text x="270" y="424" text-anchor="middle" font-family="'Helvetica Neue',Arial,sans-serif" font-size="16" fill="#a7b0bf">Instagram投稿の写真</text>
+</svg>

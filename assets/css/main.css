@@ -88,6 +88,10 @@ ul, ol { list-style: none; }
 .section--soft { background: var(--c-bg-soft); }
 .section--section { background: var(--c-bg-section); }
 
+/* SP専用の改行（PCでは非表示） */
+.sp-only { display: inline; }
+@media (min-width: 768px) { br.sp-only { display: none; } }
+
 .section-head {
   text-align: center;
   margin-bottom: 40px;
@@ -899,6 +903,56 @@ ul, ol { list-style: none; }
   }
   .approach__item--reverse .approach__visual { order: -1; }
   .approach__title { font-size: 24px; }
+}
+
+/* ----------------------------------------------------------------
+   9b. Trusted by (著名人・実績の補強)
+   左：テキスト / 右：Instagram実績画像
+   控えめ・高級感・コンパクト。CTAなし。
+---------------------------------------------------------------- */
+.trusted {
+  background: var(--c-bg);
+}
+.trusted__inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.trusted__title {
+  font-size: 22px;
+  line-height: 1.55;
+  color: var(--c-primary);
+  font-weight: 700;
+  margin: 10px 0 18px;
+  letter-spacing: 0.02em;
+}
+.trusted__text {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--c-text-muted);
+}
+.trusted__media {
+  text-align: center;
+}
+.trusted__media img {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 14px 36px var(--c-shadow);
+  border: 1px solid var(--c-border-soft);
+}
+
+@media (min-width: 768px) {
+  .trusted__inner {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+  }
+  .trusted__title { font-size: 26px; }
+  .trusted__media img { max-width: 100%; }
 }
 
 /* ----------------------------------------------------------------
