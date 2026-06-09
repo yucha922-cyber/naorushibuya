@@ -2107,3 +2107,78 @@ body { padding-bottom: var(--sp-bottom-cta-h); }
     transform: translateY(0);
   }
 }
+
+/* ----------------------------------------------------------------
+   26. モバイル最適化（〜767px）
+   ※ PC（min-width:768px）のデザインには影響しません
+   目的：片手スクロールで読み進めやすい余白・文字・画像・CTAバランス
+---------------------------------------------------------------- */
+@media (max-width: 767px) {
+  /* ② 余白・セクション間隔（詰まりすぎず空きすぎず） */
+  .section { padding: 46px 0; }
+  .section-head { margin-bottom: 28px; }
+  .container { padding-left: 18px; padding-right: 18px; }
+
+  /* ③⑧ 見出し・本文の文字サイズと行間 */
+  .section-head__title { font-size: 23px; line-height: 1.5; }
+  .section-head__lead  { font-size: 14px; line-height: 1.85; margin-top: 12px; }
+  .section-head__label { font-size: 11px; margin-bottom: 10px; }
+
+  /* 本文をやや大きく・読みやすい行間に */
+  .approach__text,
+  .risks__card-text   { font-size: 14px; line-height: 1.9; }
+  .approach__intro    { font-size: 14px; line-height: 1.85; margin-bottom: 28px; }
+  .beforeafter__data  { font-size: 14px; line-height: 1.65; }
+  .fv-cta__lead       { font-size: 14px; line-height: 1.7; }
+
+  /* ④⑪ Approach：画像が主役になりすぎないよう縮小・中央寄せ（縦並びは維持） */
+  .approach__item    { gap: 16px; margin-bottom: 38px; }
+  .approach__title   { font-size: 20px; line-height: 1.45; }
+  .approach__visual  { max-width: 340px; margin-left: auto; margin-right: auto; }
+
+  /* ① Before/After：カード間隔を最適化 */
+  .beforeafter__grid       { gap: 16px; }
+  .beforeafter__caption    { padding: 14px; }
+  .beforeafter__disclaimer { margin-top: 18px; }
+
+  /* ⑥ FV直下CTA：タップしやすい全幅・縦並び */
+  .fv-cta { padding: 20px 16px 24px; }
+  .fv-cta__btns { flex-direction: column; align-items: stretch; gap: 10px; }
+  .fv-cta__btns .btn { width: 100%; max-width: 100%; flex: 1 1 auto; }
+  .btn { min-height: 54px; }
+
+  /* ⑨ Trusted：画像をさらに控えめに、文字主体に */
+  .trusted__inner    { gap: 22px; }
+  .trusted__title    { font-size: 19px; line-height: 1.5; }
+  .trusted__text     { font-size: 14px; line-height: 1.85; }
+  .trusted__media img { max-width: 168px; }
+
+  /* ⑤ カード同士の間隔 */
+  .risks__grid { gap: 14px; }
+
+  /* 共感セクション：余白を引き締め */
+  .worries-new { padding-top: 52px; padding-bottom: 56px; }
+  .worries-new__head { margin-bottom: 32px; }
+  .worries-new__split { gap: 28px; margin-bottom: 40px; }
+  .worries-new__sub { font-size: 14px; line-height: 1.8; }
+
+  /* お客様の声：カード内の余白を最適化 */
+  .testimonial-card { padding: 20px; }
+
+  /* ⑦ Final CTA：画面下で窮屈にならないよう調整 */
+  .final-cta { padding: 50px 18px; }
+  .final-cta__title { font-size: 24px; line-height: 1.55; }
+  .final-cta__lead  { font-size: 13px; line-height: 1.85; margin-bottom: 24px; }
+  .final-cta__btns .btn { width: 100%; }
+
+  /* ⑩ アニメーション軽量化（重い移動量を抑える） */
+  .reveal { transform: translateY(10px); transition-duration: 0.45s; }
+}
+
+/* さらに小さい端末（〜400px）の微調整 */
+@media (max-width: 400px) {
+  .section-head__title { font-size: 21px; }
+  .approach__title     { font-size: 19px; }
+  .fv-cta__lead strong { font-size: 17px; }
+  .final-cta__title    { font-size: 22px; }
+}
