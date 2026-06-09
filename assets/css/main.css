@@ -126,9 +126,10 @@ ul, ol { list-style: none; }
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.96);
+  background:
+    linear-gradient(135deg, rgba(18,32,54,0.97) 0%, rgba(26,43,74,0.97) 55%, rgba(20,34,58,0.97) 100%);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--c-border-soft);
+  border-bottom: 1px solid rgba(201,168,106,0.32);  /* ゴールドの細ライン */
   height: var(--header-h);
 }
 .site-header__inner {
@@ -147,18 +148,19 @@ ul, ol { list-style: none; }
   text-decoration: none;
 }
 .site-logo__name {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 800;
-  color: var(--c-primary);
-  font-size: 19px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 20px;
   line-height: 1.1;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 .site-logo__sub {
+  font-family: var(--font-serif);
   font-size: 12px;
   font-weight: 600;
-  color: var(--c-accent);
-  letter-spacing: 0.12em;
+  color: #c9a86a;            /* ゴールドアクセント */
+  letter-spacing: 0.22em;
 }
 .header-cta {
   display: none;
