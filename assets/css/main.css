@@ -2109,76 +2109,159 @@ body { padding-bottom: var(--sp-bottom-cta-h); }
 }
 
 /* ----------------------------------------------------------------
-   26. モバイル最適化（〜767px）
-   ※ PC（min-width:768px）のデザインには影響しません
-   目的：片手スクロールで読み進めやすい余白・文字・画像・CTAバランス
+   26. Mobile-only First View + モバイル最適化（〜767px）
 ---------------------------------------------------------------- */
+/* PC: show original FV, hide mobile FV */
+.fv-mobile  { display: none; }
+.fv--pc     { display: block; }
+.fv-cta--pc { display: block; }
+
 @media (max-width: 767px) {
-  /* ② 余白・セクション間隔（詰まりすぎず空きすぎず） */
+  /* Mobile FV: show new layout, hide PC FV */
+  .fv--pc     { display: none; }
+  .fv-cta--pc { display: none; }
+  .fv-mobile {
+    display: block;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .fv-mobile__hero {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+  }
+  .fv-mobile__hero-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center 30%;
+  }
+  .fv-mobile__badge {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #b8922a 0%, #d4a93a 50%, #b8922a 100%);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-family: var(--font-serif);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .fv-mobile__body { padding: 20px 18px 8px; }
+  .fv-mobile__headline {
+    font-family: var(--font-serif);
+    font-weight: 900;
+    line-height: 1.25;
+    color: var(--c-primary);
+    margin: 0 0 16px;
+    font-size: 36px;
+    display: flex;
+    flex-direction: column;
+  }
+  .fv-mobile__hl-pre    { font-size: 28px; }
+  .fv-mobile__hl-accent { color: #d97757; font-size: 40px; }
+  .fv-mobile__hl-post   { font-size: 40px; }
+  .fv-mobile__info {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    background: #f5f8fa;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .fv-mobile__info li {
+    font-size: 12.5px;
+    color: var(--c-primary);
+    font-weight: 600;
+    padding: 8px 14px;
+    border-bottom: 1px solid #e5eaf0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .fv-mobile__info li:last-child { border-bottom: none; }
+  .fv-mobile__info-icon { font-size: 14px; flex-shrink: 0; }
+  .fv-mobile__campaign {
+    background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+    border: 2px solid #d97757;
+    border-radius: 14px;
+    padding: 16px 18px 18px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .fv-mobile__campaign-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #d97757;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+    font-family: var(--font-serif);
+  }
+  .fv-mobile__campaign-price {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .fv-mobile__campaign-regular { font-size: 13px; color: #999; text-decoration: line-through; }
+  .fv-mobile__campaign-arrow   { color: #d97757; font-weight: 700; font-size: 16px; }
+  .fv-mobile__campaign-special {
+    font-size: 32px;
+    font-weight: 900;
+    color: #d97757;
+    font-family: var(--font-serif);
+    line-height: 1;
+  }
+  .fv-mobile__campaign-special small { font-size: 14px; font-weight: 600; vertical-align: middle; }
+  .fv-mobile__campaign-include { font-size: 11.5px; color: #666; margin-bottom: 14px; font-weight: 500; }
+  .fv-mobile__btn { display: block; width: 100%; font-size: 15px; padding: 14px; border-radius: 8px; }
+
+  /* モバイル最適化 */
   .section { padding: 46px 0; }
   .section-head { margin-bottom: 28px; }
   .container { padding-left: 18px; padding-right: 18px; }
-
-  /* ③⑧ 見出し・本文の文字サイズと行間 */
   .section-head__title { font-size: 23px; line-height: 1.5; }
   .section-head__lead  { font-size: 14px; line-height: 1.85; margin-top: 12px; }
   .section-head__label { font-size: 11px; margin-bottom: 10px; }
-
-  /* 本文をやや大きく・読みやすい行間に */
   .approach__text,
   .risks__card-text   { font-size: 14px; line-height: 1.9; }
   .approach__intro    { font-size: 14px; line-height: 1.85; margin-bottom: 28px; }
   .beforeafter__data  { font-size: 14px; line-height: 1.65; }
-  .fv-cta__lead       { font-size: 14px; line-height: 1.7; }
-
-  /* ④⑪ Approach：画像が主役になりすぎないよう縮小・中央寄せ（縦並びは維持） */
   .approach__item    { gap: 16px; margin-bottom: 38px; }
   .approach__title   { font-size: 20px; line-height: 1.45; }
   .approach__visual  { max-width: 340px; margin-left: auto; margin-right: auto; }
-
-  /* ① Before/After：カード間隔を最適化 */
   .beforeafter__grid       { gap: 16px; }
   .beforeafter__caption    { padding: 14px; }
   .beforeafter__disclaimer { margin-top: 18px; }
-
-  /* ⑥ FV直下CTA：タップしやすい全幅・縦並び */
-  .fv-cta { padding: 20px 16px 24px; }
-  .fv-cta__btns { flex-direction: column; align-items: stretch; gap: 10px; }
-  .fv-cta__btns .btn { width: 100%; max-width: 100%; flex: 1 1 auto; }
   .btn { min-height: 54px; }
-
-  /* ⑨ Trusted：画像をさらに控えめに、文字主体に */
   .trusted__inner    { gap: 22px; }
   .trusted__title    { font-size: 19px; line-height: 1.5; }
   .trusted__text     { font-size: 14px; line-height: 1.85; }
   .trusted__media img { max-width: 168px; }
-
-  /* ⑤ カード同士の間隔 */
   .risks__grid { gap: 14px; }
-
-  /* 共感セクション：余白を引き締め */
   .worries-new { padding-top: 52px; padding-bottom: 56px; }
   .worries-new__head { margin-bottom: 32px; }
   .worries-new__split { gap: 28px; margin-bottom: 40px; }
   .worries-new__sub { font-size: 14px; line-height: 1.8; }
-
-  /* お客様の声：カード内の余白を最適化 */
   .testimonial-card { padding: 20px; }
-
-  /* ⑦ Final CTA：画面下で窮屈にならないよう調整 */
   .final-cta { padding: 50px 18px; }
   .final-cta__title { font-size: 24px; line-height: 1.55; }
   .final-cta__lead  { font-size: 13px; line-height: 1.85; margin-bottom: 24px; }
   .final-cta__btns .btn { width: 100%; }
-
-  /* ⑩ アニメーション軽量化（重い移動量を抑える） */
   .reveal { transform: translateY(10px); transition-duration: 0.45s; }
 }
 
-/* さらに小さい端末（〜400px）の微調整 */
 @media (max-width: 400px) {
   .section-head__title { font-size: 21px; }
   .approach__title     { font-size: 19px; }
-  .fv-cta__lead strong { font-size: 17px; }
   .final-cta__title    { font-size: 22px; }
 }

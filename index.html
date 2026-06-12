@@ -75,7 +75,42 @@
   画像全体がNAORU予約サイト（reserve.naoru.info）への外部リンク（別タブ）です。
   渋谷院専用の予約ページURLが分かる場合はそのURLへ差し替えてください。
 -->
-<section class="fv" id="top">
+<!-- ================== Mobile First View (モバイル専用FV) ================== -->
+<section class="fv-mobile" id="top" aria-label="ファーストビュー（モバイル）">
+  <div class="fv-mobile__hero">
+    <img
+      src="assets/img/fv/hero.jpg"
+      alt="NAORU整体 渋谷院｜施術シーン"
+      class="fv-mobile__hero-img"
+      fetchpriority="high"
+      onerror="this.onerror=null;this.src='assets/img/fv/placeholder.svg';">
+    <div class="fv-mobile__badge">医師も推薦する根本改善整体</div>
+  </div>
+  <div class="fv-mobile__body">
+    <h1 class="fv-mobile__headline">
+      <span class="fv-mobile__hl-pre">つらい</span>
+      <span class="fv-mobile__hl-accent">肩こりを</span>
+      <span class="fv-mobile__hl-post">根本改善</span>
+    </h1>
+    <ul class="fv-mobile__info">
+      <li><span class="fv-mobile__info-icon">📍</span>渋谷駅・表参道駅から徒歩10分</li>
+      <li><span class="fv-mobile__info-icon">🕐</span>年中無休 20時まで営業</li>
+      <li><span class="fv-mobile__info-icon">✨</span>AI姿勢検査 ＋ 整体</li>
+    </ul>
+    <div class="fv-mobile__campaign">
+      <div class="fv-mobile__campaign-label">初めての方限定キャンペーン</div>
+      <div class="fv-mobile__campaign-price">
+        <span class="fv-mobile__campaign-regular">通常 13,200円</span>
+        <span class="fv-mobile__campaign-arrow">→</span>
+        <span class="fv-mobile__campaign-special">3,500円<small>（税込）</small></span>
+      </div>
+      <div class="fv-mobile__campaign-include">AI姿勢検査 ＋ 整体 込み</div>
+      <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="btn btn--cta fv-mobile__btn">初回3,500円で予約する</a>
+    </div>
+  </div>
+</section>
+
+<section class="fv fv--pc">
   <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="fv__image-link" aria-label="初回限定3,500円キャンペーン｜ご予約へ">
     <img
       src="assets/img/fv/hero.jpg"
@@ -89,7 +124,7 @@
 </section>
 
 <!-- ================== First View CTA Strip ================== -->
-<section class="fv-cta">
+<section class="fv-cta fv-cta--pc">
   <div class="fv-cta__inner">
     <p class="fv-cta__lead">初回限定 <strong>3,500円</strong>（通常 13,200円）／AI姿勢分析つき</p>
     <div class="fv-cta__btns">
