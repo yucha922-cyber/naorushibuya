@@ -103,15 +103,32 @@ const MESSAGES = {
   NEW_DATES_UNDECIDED:
 `承知いたしました。
 
-またご都合がお分かりになりましたら、いつでもご連絡ください。
-
-スタッフにて対応が必要な場合は、後ほどご連絡いたします。`,
+またご都合よろしい日がありましたらご連絡ください。`,
 };
+
+// ---- キーワードによる事前判定 -----------------------------------------------
+
+/**
+ * 「日時不明・未定」を示すキーワード。
+ * AIを呼ぶ前にコードで判定し、誤判定を防ぐ。
+ */
+const UNDECIDED_KEYWORDS = [
+  '未定', 'わからない', '分からない', '分かりません', 'わかりません',
+  '忘れた', '忘れました', '確認してから', '確認します', 'また連絡',
+  'また連絡します', 'また後で', 'まだ決まっていない', 'まだ決まってない',
+  'まだわかりません', 'まだわからない', '決まったら', '決まり次第',
+];
+
+function isUndecidedText(text) {
+  const normalized = text.trim().toLowerCase();
+  return UNDECIDED_KEYWORDS.some((kw) => normalized.includes(kw));
+}
 
 // ---- AI による日時解析 ------------------------------------------------------
 
 /**
  * ユーザーメッセージから日時情報または「不明」を判定する。
+ * まずキーワードで事前判定し、判断できない場合のみ AI を呼ぶ。
  *
  * @param {string} userText
  * @param {'cancel_date'|'new_dates'} mode
@@ -120,15 +137,20 @@ const MESSAGES = {
  *   summary:  スタッフ向けの日時テキスト（Sheets記録用）
  */
 async function extractDateInfo(userText, mode) {
+  // キーワードで「未定・分からない」と確定できる場合は AI を呼ばない
+  if (isUndecidedText(userText)) {
+    return { detected: false, summary: '' };
+  }
+
   const systemPrompt = mode === 'cancel_date'
     ? `あなたはユーザーの返信からキャンセルしたい予約の日時を抽出するアシスタントです。
-ユーザーが「分からない」「忘れた」「確認してから」「未定」のような表現をした場合は detected: false にしてください。
 日時・曜日・時間帯・「明日」「来週」などの相対表現が含まれていれば detected: true にしてください。
+そうでない場合は detected: false にしてください。
 以下のJSON形式のみで返答してください:
 {"detected": true|false, "summary": "抽出した日時情報（例: 6月20日15時）または空文字"}`
     : `あなたはユーザーの返信から希望日時の候補を抽出するアシスタントです。
-ユーザーが「未定」「また連絡」「まだ決まっていない」のような表現をした場合は detected: false にしてください。
 1つでも日時・曜日・時間帯の候補が含まれていれば detected: true にしてください。
+そうでない場合は detected: false にしてください。
 以下のJSON形式のみで返答してください:
 {"detected": true|false, "summary": "抽出した候補日時（例: 来週月曜午前、水曜18時以降）または空文字"}`;
 
