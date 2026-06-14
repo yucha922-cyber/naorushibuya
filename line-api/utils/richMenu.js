@@ -11,17 +11,24 @@
  *  │  (テキスト送信)     │  (リンク)            │
  *  └─────────────────────┴─────────────────────┘
  *
+ *  ※ キャンセル・日程変更ボタンを追加する場合:
+ *     LINE OA Manager でボタンを追加し、テキスト送信を
+ *     'キャンセル・日程変更' に設定してください。
+ *
  * WebhookでLINEから届くテキスト:
  *   A → "AI問診"
  *   C → "スタッフ相談"
+ *   （キャンセル・日程変更ボタン） → "キャンセル・日程変更"
  *
  * B・Dはリンクなのでwebhookイベントは発生しない。
  */
 
 // LINEから届く各ボタンのテキスト（webhook.jsで参照）
 const RICH_MENU_ACTIONS = {
-  AI_INQUIRY:   'AI問診',    // A: 簡単AI診断
-  STAFF_CONSULT: 'スタッフ相談', // C: スタッフ相談
+  AI_INQUIRY:    'AI問診',          // A: 簡単AI診断
+  STAFF_CONSULT: 'スタッフ相談',    // C: スタッフ相談
+  CANCEL_FLOW:   'キャンセル・日程変更', // キャンセル・日程変更専用ボタン
 };
 
 module.exports = { RICH_MENU_ACTIONS };
+
