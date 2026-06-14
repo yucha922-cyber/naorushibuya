@@ -133,7 +133,7 @@ const MISTAKE_KEYWORDS = [
 ];
 
 /** キャンセルフローの自動タイムアウト時間（時間単位） */
-const CANCEL_FLOW_TIMEOUT_HOURS = 6;
+const CANCEL_FLOW_TIMEOUT_HOURS = 1;
 
 function isUndecidedText(text) {
   const normalized = text.trim().toLowerCase();

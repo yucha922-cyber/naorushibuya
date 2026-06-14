@@ -233,16 +233,26 @@ async function handleEvent(event) {
     console.error('[webhook] Redis取得失敗（AIモードで続行）:', err.message);
   }
 
+  // ---- 条件3: スタッフ対応中（有人モード）はAI自動返信を停止 ---------------
+  // スタッフが対応を引き継いだ後はAI（キャンセルフロー）が割り込まないようにする。
+  // 有人モード中はキャンセルフローも進行させず、stateもクリアしておく。
+  if (mode === 'human' && cancelFlowState !== null) {
+    await safe('cancelFlow クリア（有人対応中）', () =>
+      updateUserData(userId, { cancelFlowState: null })
+    );
+    cancelFlowState = null;
+  }
+
   // ---- ① キャンセルフロー --------------------------------------------------
   // リッチメニュー「キャンセル」ボタン押下でフロー開始。フロー継続中もここで処理する。
-  // human モード・予約確定中でも割り込みできる（患者都合のキャンセルを優先）。
+  // ※ 有人対応中（mode==='human'）はAIを動かさないため、ここでは発動しない。
   //
   // ※「キャンセル」は AI問診中断キーワード（⑧）とも重複する。
   //   問診中（inquiryStep≧1）に「キャンセル」が来た場合は従来どおり
   //   問診中断（⑧）を優先し、問診外でのみキャンセルフローを開始する。
   //   これにより既存の問診中断機能を壊さない。
   const isCancelFlowTrigger = userText === RICH_MENU_ACTIONS.CANCEL_FLOW;
-  if (isCancelFlowTrigger || cancelFlowState !== null) {
+  if (mode !== 'human' && (isCancelFlowTrigger || cancelFlowState !== null)) {
     const handled = await handleCancelFlow({
       replyToken:      event.replyToken,
       userId,
