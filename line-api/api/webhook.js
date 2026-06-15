@@ -174,10 +174,12 @@ async function handleEvent(event) {
     // 対応履歴に記録
     await logHistory({ userId, displayName, eventType: '友だち追加', content: '' });
 
-    return reply(
-      event.replyToken,
-      `${displayName}さん、NAORU整体 渋谷院です。\n友だち追加ありがとうございます！\n\n下のメニューから「簡単AI診断」を選ぶと、症状の分析ができます。\nお悩みをそのままメッセージで送っていただいても大丈夫です。\n\n▼初回予約（3,500円）\n${RESERVE_URL}`
-    );
+    // 友だち追加時の自動返信は停止中（再開時は下の return reply(...) を有効にする）
+    return null;
+    // return reply(
+    //   event.replyToken,
+    //   `${displayName}さん、NAORU整体 渋谷院です。\n友だち追加ありがとうございます！\n\n下のメニューから「簡単AI診断」を選ぶと、症状の分析ができます。\nお悩みをそのままメッセージで送っていただいても大丈夫です。\n\n▼初回予約（3,500円）\n${RESERVE_URL}`
+    // );
   }
 
   // テキストメッセージ以外は無視
