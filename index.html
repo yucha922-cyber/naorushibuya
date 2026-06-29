@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-store="shibuya">
 <head>
 <meta charset="UTF-8">
 <!-- Google Tag Manager -->
@@ -29,8 +29,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <link rel="stylesheet" href="assets/css/main.css">
 
-<!-- JSON-LD: LocalBusiness -->
-<script type="application/ld+json">
+<!-- JSON-LD: LocalBusiness（store.js が stores/<id>.json から再構築します） -->
+<script type="application/ld+json" id="store-jsonld">
 {
   "@context": "https://schema.org",
   "@type": "HealthAndBeautyBusiness",
@@ -72,11 +72,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- ================== Header ================== -->
 <header class="site-header">
   <div class="site-header__inner">
-    <a href="#top" class="site-logo" aria-label="NAORU整体 渋谷院">
-      <span class="site-logo__name">NAORU整体</span>
-      <span class="site-logo__sub">渋谷院</span>
+    <a href="#top" class="site-logo" aria-label="NAORU整体 渋谷院" data-store-attr="aria-label:storeName">
+      <span class="site-logo__name" data-store-text="brandName">NAORU整体</span>
+      <span class="site-logo__sub" data-store-text="branchName">渋谷院</span>
     </a>
-    <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="header-cta">初回3,500円で予約 →</a>
+    <a href="https://reserve.naoru.info/" data-store-attr="href:reserveUrl" target="_blank" rel="noopener noreferrer" class="header-cta">初回3,500円で予約 →</a>
   </div>
 </header>
 
@@ -85,7 +85,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   モバイル用: assets/img/fv/fv-main.jpg（縦長）
 -->
 <section class="fv" id="top">
-  <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="fv__image-link" aria-label="つらい肩こりを根本改善｜初回限定3,500円キャンペーン｜ご予約へ">
+  <a href="https://reserve.naoru.info/" data-store-attr="href:reserveUrl" target="_blank" rel="noopener noreferrer" class="fv__image-link" aria-label="つらい肩こりを根本改善｜初回限定3,500円キャンペーン｜ご予約へ">
     <picture>
       <source media="(min-width: 768px)" srcset="assets/img/fv/fv-pc.jpg" width="1535" height="1024">
       <img
@@ -105,8 +105,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="fv-cta__inner">
     <p class="fv-cta__lead">初回限定 <strong>3,500円</strong>（通常 13,200円）／AI姿勢分析つき</p>
     <div class="fv-cta__btns">
-      <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="btn btn--cta">初回3,500円で予約する</a>
-      <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="btn btn--line">まずはLINEで無料相談する</a>
+      <a href="https://reserve.naoru.info/" data-store-attr="href:reserveUrl" target="_blank" rel="noopener noreferrer" class="btn btn--cta">初回3,500円で予約する</a>
+      <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="btn btn--line">まずはLINEで無料相談する</a>
     </div>
   </div>
 </section>
@@ -279,7 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- フルワイドCTAブロック＋下矢印 -->
     <div class="worries-new__cta-block reveal">
       <p class="worries-new__cta-lead">ひとつでも当てはまった方へ —</p>
-      <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="btn btn--line">まずはLINEで無料相談する</a>
+      <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="btn btn--line">まずはLINEで無料相談する</a>
       <p class="worries-new__cta-note">無料・1分で完了・友だち追加するだけ</p>
       <div class="worries-new__arrow" aria-hidden="true">
         <span></span><span></span><span></span>
@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- シーン写真3枚（クリックでLINEへ） -->
     <div class="worries-new__scenes reveal">
       <figure class="worries-new__scene">
-        <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで首・肩こりを無料AI診断">
+        <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで首・肩こりを無料AI診断">
           <img src="assets/img/worries/scene-shoulder.jpg" alt="首・肩こりの施術風景" loading="lazy"
             onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
           <div class="worries-new__scene-overlay"><span>LINEで無料相談 →</span></div>
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <figcaption>首・肩こり</figcaption>
       </figure>
       <figure class="worries-new__scene">
-        <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで腰痛・骨盤を無料AI診断">
+        <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで腰痛・骨盤を無料AI診断">
           <img src="assets/img/worries/scene-back.jpg" alt="腰痛・骨盤の施術風景" loading="lazy"
             onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
           <div class="worries-new__scene-overlay"><span>LINEで無料相談 →</span></div>
@@ -305,7 +305,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <figcaption>腰痛・骨盤</figcaption>
       </figure>
       <figure class="worries-new__scene">
-        <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで姿勢の乱れを無料AI診断">
+        <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="worries-new__scene-link" aria-label="LINEで姿勢の乱れを無料AI診断">
           <img src="assets/img/worries/scene-posture.jpg" alt="姿勢改善の施術風景" loading="lazy"
             onerror="this.onerror=null;this.src='assets/img/worries/placeholder.svg';">
           <div class="worries-new__scene-overlay"><span>LINEで無料相談 →</span></div>
@@ -679,8 +679,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h2 class="mid-cta__title">いま空いている時間を、<br>確認してみませんか？</h2>
   <p class="mid-cta__lead">初回限定 3,500円（通常 13,200円）／AI姿勢分析つき</p>
   <div class="mid-cta__btns">
-    <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="btn btn--cta">予約サイトで予約する</a>
-    <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="btn btn--outline">まずはLINEで無料相談する</a>
+    <a href="https://reserve.naoru.info/" data-store-attr="href:reserveUrl" target="_blank" rel="noopener noreferrer" class="btn btn--cta">予約サイトで予約する</a>
+    <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="btn btn--outline">まずはLINEで無料相談する</a>
   </div>
 </section>
 
@@ -776,20 +776,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               alt="院長 洪侑沙（理学療法士・国家資格）"
               width="600" height="800"
               loading="lazy" decoding="async"
+              data-store-attr="src:staff.0.photo, alt:staff.0.photoAlt"
               onerror="this.onerror=null;this.src='assets/img/staff/placeholder-hong.svg';">
           </figure>
           <div class="staff__info">
-            <div class="staff__role">院長</div>
-            <h3 class="staff__name">洪 侑沙<span class="staff__name-en">YUSA</span></h3>
-            <p class="staff__qual">理学療法士（国家資格）</p>
+            <div class="staff__role" data-store-text="staff.0.role">院長</div>
+            <h3 class="staff__name"><span data-store-text="staff.0.name">洪 侑沙</span><span class="staff__name-en" data-store-text="staff.0.nameEn">YUSA</span></h3>
+            <p class="staff__qual" data-store-text="staff.0.qualification">理学療法士（国家資格）</p>
             <ul class="staff__career">
-              <li>千葉県立保健医療大学 卒業</li>
-              <li>2017年 紺整会 船橋整形外科グループ 入社</li>
-              <li>2024年 株式会社NAORUテクノロジー 参画</li>
+              <li data-store-text="staff.0.career.0">千葉県立保健医療大学 卒業</li>
+              <li data-store-text="staff.0.career.1">2017年 紺整会 船橋整形外科グループ 入社</li>
+              <li data-store-text="staff.0.career.2">2024年 株式会社NAORUテクノロジー 参画</li>
             </ul>
           </div>
         </div>
-        <p class="staff__msg">「関わった全ての人を、笑顔に幸せにする」。整形外科クリニックや海外で多くの患者様を施術してきた経験を活かし、皆さまのニーズやゴールに向かって一生懸命サポートいたします。小さなことでもお気軽にご相談ください。</p>
+        <p class="staff__msg" data-store-text="staff.0.message">「関わった全ての人を、笑顔に幸せにする」。整形外科クリニックや海外で多くの患者様を施術してきた経験を活かし、皆さまのニーズやゴールに向かって一生懸命サポートいたします。小さなことでもお気軽にご相談ください。</p>
       </div>
       <div class="staff__card reveal">
         <div class="staff__top">
@@ -799,20 +800,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               alt="副院長 酒井翔子（鍼灸師・国家資格）"
               width="600" height="800"
               loading="lazy" decoding="async"
+              data-store-attr="src:staff.1.photo, alt:staff.1.photoAlt"
               onerror="this.onerror=null;this.src='assets/img/staff/placeholder-sakai.svg';">
           </figure>
           <div class="staff__info">
-            <div class="staff__role">副院長</div>
-            <h3 class="staff__name">酒井 翔子<span class="staff__name-en">SHOKO</span></h3>
-            <p class="staff__qual">鍼灸師（国家資格）</p>
+            <div class="staff__role" data-store-text="staff.1.role">副院長</div>
+            <h3 class="staff__name"><span data-store-text="staff.1.name">酒井 翔子</span><span class="staff__name-en" data-store-text="staff.1.nameEn">SHOKO</span></h3>
+            <p class="staff__qual" data-store-text="staff.1.qualification">鍼灸師（国家資格）</p>
             <ul class="staff__career">
-              <li>2020〜2023年 iCure鍼灸接骨院（大阪）</li>
-              <li>2023〜2025年 オーストラリア・ニュージーランドでマッサージ勤務</li>
-              <li>2025年〜 株式会社NAORUテクノロジー 参画（渋谷院）</li>
+              <li data-store-text="staff.1.career.0">2020〜2023年 iCure鍼灸接骨院（大阪）</li>
+              <li data-store-text="staff.1.career.1">2023〜2025年 オーストラリア・ニュージーランドでマッサージ勤務</li>
+              <li data-store-text="staff.1.career.2">2025年〜 株式会社NAORUテクノロジー 参画（渋谷院）</li>
             </ul>
           </div>
         </div>
-        <p class="staff__msg">慢性の肩こり・腰痛、姿勢不良、骨盤矯正を中心にサポートしてきました。女性ならではの冷え・むくみ・生理痛・産後の骨盤トラブルもお気軽に。お一人おひとりの状態を丁寧に確認し、根本原因にアプローチする施術を行います。</p>
+        <p class="staff__msg" data-store-text="staff.1.message">慢性の肩こり・腰痛、姿勢不良、骨盤矯正を中心にサポートしてきました。女性ならではの冷え・むくみ・生理痛・産後の骨盤トラブルもお気軽に。お一人おひとりの状態を丁寧に確認し、根本原因にアプローチする施術を行います。</p>
       </div>
     </div>
   </div>
@@ -831,27 +833,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <dl class="access__info-list">
         <div class="access__info-item">
           <dt class="access__info-label">店舗名</dt>
-          <dd class="access__info-value">NAORU整体 渋谷院</dd>
+          <dd class="access__info-value" data-store-text="storeName">NAORU整体 渋谷院</dd>
         </div>
         <div class="access__info-item">
           <dt class="access__info-label">住所</dt>
-          <dd class="access__info-value">〒150-0002 東京都渋谷区渋谷2-2-4 青山アルコーブ6階606号室<br>（青山学院大学西門 目の前のマンションです）</dd>
+          <dd class="access__info-value" data-store-html="address.fullHtml">〒150-0002 東京都渋谷区渋谷2-2-4 青山アルコーブ6階606号室<br>（青山学院大学西門 目の前のマンションです）</dd>
         </div>
         <div class="access__info-item">
           <dt class="access__info-label">アクセス</dt>
-          <dd class="access__info-value">JR・各線 渋谷駅より徒歩10分／東京メトロ 表参道駅より徒歩7分</dd>
+          <dd class="access__info-value" data-store-text="accessText">JR・各線 渋谷駅より徒歩10分／東京メトロ 表参道駅より徒歩7分</dd>
         </div>
         <div class="access__info-item">
           <dt class="access__info-label">営業時間</dt>
-          <dd class="access__info-value">11:00〜20:00（最終受付 19:00）</dd>
+          <dd class="access__info-value" data-store-text="businessHours">11:00〜20:00（最終受付 19:00）</dd>
         </div>
         <div class="access__info-item">
           <dt class="access__info-label">定休日</dt>
-          <dd class="access__info-value">不定休</dd>
+          <dd class="access__info-value" data-store-text="closedDays">不定休</dd>
         </div>
         <div class="access__info-item">
           <dt class="access__info-label">電話番号</dt>
-          <dd class="access__info-value"><a href="tel:07085196347">070-8519-6347</a></dd>
+          <dd class="access__info-value"><a href="tel:07085196347" data-store-attr="href:tel.telLink" data-store-text="tel.display">070-8519-6347</a></dd>
         </div>
       </dl>
 
@@ -859,6 +861,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="access__map">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.6713888634713!2d139.70607527585392!3d35.6604670725939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b7aa006cb75%3A0xed936a92c4dea66b!2zTkFPUlXmlbTkvZMg5riL6LC36Zmi!5e0!3m2!1sja!2sjp!4v1779294894714!5m2!1sja!2sjp"
+            data-store-attr="src:mapEmbedUrl"
             title="NAORU整体 渋谷院の地図"
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
@@ -866,6 +869,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <a class="access__map-btn"
           href="https://www.google.com/maps/search/?api=1&amp;query=NAORU%E6%95%B4%E4%BD%93%20%E6%B8%8B%E8%B0%B7%E9%99%A2"
+          data-store-attr="href:mapUrl"
           target="_blank" rel="noopener noreferrer">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           Google Mapで開く
@@ -892,7 +896,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <strong>AI姿勢分析 ＋ カウンセリング ＋ 施術（60分）</strong><br>
         すべて込み・追加料金なし
       </p>
-      <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="btn btn--cta btn--block">初回3,500円で予約する</a>
+      <a href="https://reserve.naoru.info/" data-store-attr="href:reserveUrl" target="_blank" rel="noopener noreferrer" class="btn btn--cta btn--block">初回3,500円で予約する</a>
     </div>
 
     <table class="pricing__table reveal">
@@ -1043,12 +1047,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     通常 ¥13,200 → 初回限定 <strong>¥3,500</strong>（税込）
   </div>
   <div class="final-cta__btns">
-    <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="btn btn--cta">予約サイトで予約する</a>
-    <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="btn btn--line">まずはLINEで無料相談する</a>
+    <a href="https://reserve.naoru.info/" data-store-attr="href:reserveUrl" target="_blank" rel="noopener noreferrer" class="btn btn--cta">予約サイトで予約する</a>
+    <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="btn btn--line">まずはLINEで無料相談する</a>
   </div>
   <p class="final-cta__tel">
     お電話でも承ります（対応中は出られない可能性があります）<br>
-    <a href="tel:07085196347">070-8519-6347</a>
+    <a href="tel:07085196347" data-store-attr="href:tel.telLink" data-store-text="tel.display">070-8519-6347</a>
   </p>
 </section>
 
@@ -1062,22 +1066,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="privacy.html">プライバシーポリシー</a>
     <a href="terms.html">利用規約</a>
   </nav>
-  <p class="site-footer__copy">© <span id="current-year">2026</span> NAORU整体 渋谷院</p>
+  <p class="site-footer__copy">© <span id="current-year">2026</span> <span data-store-text="storeName">NAORU整体 渋谷院</span></p>
 </footer>
 
 <!-- ================== Sticky Bottom CTA ================== -->
 <div class="sticky-cta" aria-hidden="true">
-  <a href="https://reserve.naoru.info/" target="_blank" rel="noopener noreferrer" class="btn btn--cta">
+  <a href="https://reserve.naoru.info/" data-store-attr="href:reserveUrl" target="_blank" rel="noopener noreferrer" class="btn btn--cta">
     初回3,500円で予約
     <small>かんたんネット予約</small>
   </a>
-  <a href="#" data-line-link target="_blank" rel="noopener noreferrer" class="btn btn--line">
+  <a href="#" data-line-link data-store-attr="href:lineUrl" target="_blank" rel="noopener noreferrer" class="btn btn--line">
     まずはLINEで無料相談する
     <small>友だち追加</small>
   </a>
 </div>
 
 <script src="assets/js/main.js" defer></script>
+<script src="assets/js/store.js" defer></script>
 
 </body>
 </html>
